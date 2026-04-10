@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>প্রো পিপল ম্যানেজার - গুগল শীট (সরাসরি সংযুক্ত)</title>
+    <title>প্রো পিপল ম্যানেজার - গুগল শীট (CORS ফিক্সড)</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
@@ -49,6 +49,7 @@
         .stat-number{font-size:2rem;font-weight:800;color:#2563eb;}
         .sync-config{background:#eef2ff;border-radius:24px;padding:1rem;margin-bottom:1.5rem;display:flex;flex-wrap:wrap;align-items:center;gap:12px;}
         .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:1000;color:white;font-weight:bold;font-size:1.2rem;}
+        .cors-warning{background:#fee2e2;border-left:4px solid #ef4444;padding:12px;margin-bottom:16px;border-radius:16px;display:none;}
         @media (max-width:680px){body{padding:12px;}.card{padding:1rem;}th,td{padding:10px 6px;}}
     </style>
 </head>
@@ -58,7 +59,7 @@
         <h1>👥 প্রো পিপল ম্যানেজার (গুগল শীট)</h1>
         <div class="lock-badge">🔐 ডিলিট/রিসেটে পাসওয়ার্ড লাগে</div>
     </div>
-
+    <div id="corsWarning" class="cors-warning">⚠️ CORS সমস্যার কারণে সরাসরি সংযোগ ব্যর্থ। নিচের "URL পরীক্ষা" বাটনে ক্লিক করে দেখুন। যদি কাজ না করে, অনুগ্রহ করে Apps Script Web App টি পুনরায় ডিপ্লয় করুন "Anyone" অ্যাক্সেস দিয়ে।</div>
     <div class="card sync-config">
         <span>📡 গুগল শীট সিঙ্ক</span>
         <button id="pullFromSheetsBtn" class="btn btn-success">📥 শীট থেকে টেনে আনুন</button>
@@ -88,14 +89,13 @@
     <div class="card">
         <input type="text" id="searchBox" class="search-box" placeholder="🔍 যেকোনো কিছু লিখুন (নাম, ফোন, এলাকা, রোল, নোট...)">
         <div class="filters"><select id="filterRole"><option value="">সব রোল</option></select><select id="filterArea"><option value="">সব এলাকা</option></select><select id="filterCluster"><option value="">সব ক্লাস্টার</option></select></div>
-        <div class="stats-row"><div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>মোট সদস্য</div></div><div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>ফলাফল (বর্তমান)</div></div></div>
+        <div class="stats-row"><div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>মোট সদস্য</div></div><div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>ফলাফল</div></div></div>
         <div class="btn-group" style="justify-content:flex-end;"><button id="exportBtn" class="btn btn-warning">📁 JSON এক্সপোর্ট</button><label for="importFile" class="btn btn-outline" style="cursor:pointer;">📂 JSON ইমপোর্ট</label><input type="file" id="importFile" accept=".json" style="display:none;"><button id="resetDataBtn" class="btn btn-danger">🔄 ডিফল্ট রিসেট</button><button id="backupReminderBtn" class="btn btn-primary">☁️ গুগল ড্রাইভ ব্যাকআপ</button></div>
         <div class="table-wrapper"><table id="peopleTable"><thead><tr><th>ID</th><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>ক্লাস্টার</th><th>নোট</th><th style="width:60px"></th></tr></thead><tbody></tbody></table></div>
     </div>
 </div>
 
 <script>
-    // ------------------- কনফিগারেশন -------------------
     const ADMIN_PASSWORD = "admin123";
     const STORAGE_KEY = "peopleManagerData";
     const BACKUP_INTERVAL_DAYS = 7;
@@ -105,20 +105,11 @@
     let peopleData = [];
     let fuseInstance = null;
 
-    // ---------- হেল্পার ফাংশন ----------
-    function showLoading(msg) {
-        let ov = document.querySelector('.loading-overlay');
-        if (!ov) {
-            ov = document.createElement('div');
-            ov.className = 'loading-overlay';
-            ov.innerHTML = `<div style="background:#1e293b; padding:1rem 2rem; border-radius:60px;">${msg}</div>`;
-            document.body.appendChild(ov);
-        } else { ov.querySelector('div').innerText = msg; ov.style.display = 'flex'; }
-    }
-    function hideLoading() { let ov = document.querySelector('.loading-overlay'); if (ov) ov.style.display = 'none'; }
-    function updateSyncStatus(msg) { let sp = document.getElementById('syncStatus'); sp.innerText = msg; setTimeout(() => { if (sp.innerText === msg) sp.innerText = ''; }, 4000); }
+    function showLoading(msg) { let ov = document.querySelector('.loading-overlay'); if(!ov){ ov=document.createElement('div'); ov.className='loading-overlay'; ov.innerHTML=`<div style="background:#1e293b; padding:1rem 2rem; border-radius:60px;">${msg}</div>`; document.body.appendChild(ov); } else { ov.querySelector('div').innerText=msg; ov.style.display='flex'; } }
+    function hideLoading() { let ov = document.querySelector('.loading-overlay'); if(ov) ov.style.display='none'; }
+    function updateSyncStatus(msg) { let sp = document.getElementById('syncStatus'); sp.innerText=msg; setTimeout(()=>{ if(sp.innerText===msg) sp.innerText=''; },4000); }
 
-    // ---------- ফোন নম্বর প্রক্রিয়াকরণ ----------
+    // ফোন ফাংশন
     function cleanIndianPhone(phone) {
         let cleaned = String(phone).replace(/[\s\-\(\)]/g, '');
         if (cleaned.startsWith('+91')) cleaned = cleaned.slice(3);
@@ -145,33 +136,22 @@
         });
     }
 
-    // ---------- লোকাল স্টোর ও ফিউজ ----------
+    // লোকাল স্টোর ও রেন্ডার
     function saveToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData)); updateStats(); }
     function rebuildFuse() { fuseInstance = new Fuse(peopleData, { keys: ['name','phone','area','role','cluster','note'], threshold: 0.3, includeMatches: true }); }
-    function updateStats() {
-        document.getElementById('totalCount').innerText = peopleData.length;
-        document.getElementById('filteredCount').innerText = getFilteredData().length;
-    }
-
+    function updateStats() { document.getElementById('totalCount').innerText = peopleData.length; document.getElementById('filteredCount').innerText = getFilteredData().length; }
     function getFilteredData() {
         let filtered = peopleData;
         const q = document.getElementById('searchBox').value.trim();
         if (q) filtered = fuseInstance.search(q).map(r => r.item);
-        const role = document.getElementById('filterRole').value;
-        const area = document.getElementById('filterArea').value;
-        const cluster = document.getElementById('filterCluster').value;
+        const role = document.getElementById('filterRole').value, area = document.getElementById('filterArea').value, cluster = document.getElementById('filterCluster').value;
         if (role) filtered = filtered.filter(p => p.role === role);
         if (area) filtered = filtered.filter(p => p.area === area);
         if (cluster) filtered = filtered.filter(p => p.cluster === cluster);
         return filtered;
     }
-    function highlightText(text, query) {
-        if (!query || !text) return text || '';
-        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return text.replace(regex, `<span class="highlight">$1</span>`);
-    }
+    function highlightText(text, query) { if (!query || !text) return text||''; const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,'gi'); return text.replace(regex,`<span class="highlight">$1</span>`); }
     function closeAllDropdowns() { document.querySelectorAll('.dropdown').forEach(d => d.style.display = 'none'); }
-
     function renderTable() {
         const filtered = getFilteredData();
         const tbody = document.querySelector('#peopleTable tbody');
@@ -180,17 +160,17 @@
         filtered.forEach(p => {
             const row = tbody.insertRow();
             row.insertCell(0).innerText = p.id;
-            row.insertCell(1).innerHTML = highlightText(p.name || '', q);
-            row.insertCell(2).innerHTML = highlightText(p.phone || '', q);
-            row.insertCell(3).innerHTML = highlightText(p.area || '', q);
-            row.insertCell(4).innerHTML = highlightText(p.role || '', q);
-            row.insertCell(5).innerHTML = highlightText(p.cluster || '', q);
-            row.insertCell(6).innerHTML = highlightText(p.note || '', q);
+            row.insertCell(1).innerHTML = highlightText(p.name||'', q);
+            row.insertCell(2).innerHTML = highlightText(p.phone||'', q);
+            row.insertCell(3).innerHTML = highlightText(p.area||'', q);
+            row.insertCell(4).innerHTML = highlightText(p.role||'', q);
+            row.insertCell(5).innerHTML = highlightText(p.cluster||'', q);
+            row.insertCell(6).innerHTML = highlightText(p.note||'', q);
             const act = row.insertCell(7); act.className = 'action-cell';
             const keb = document.createElement('button'); keb.textContent = '⋮'; keb.className = 'kebab';
             const dd = document.createElement('div'); dd.className = 'dropdown';
             const callBtn = document.createElement('button'); callBtn.textContent = '📞 কল'; callBtn.onclick = (e) => { e.stopPropagation(); window.location.href = `tel:+91${cleanIndianPhone(p.phone)}`; closeAllDropdowns(); };
-            const waBtn = document.createElement('button'); waBtn.textContent = '💬 হোয়াটসঅ্যাপ'; waBtn.onclick = (e) => { e.stopPropagation(); window.open(`https://wa.me/91${cleanIndianPhone(p.phone)}`, '_blank'); closeAllDropdowns(); };
+            const waBtn = document.createElement('button'); waBtn.textContent = '💬 হোয়াটসঅ্যাপ'; waBtn.onclick = (e) => { e.stopPropagation(); window.open(`https://wa.me/91${cleanIndianPhone(p.phone)}`,'_blank'); closeAllDropdowns(); };
             const editBtn = document.createElement('button'); editBtn.textContent = '✏️ এডিট'; editBtn.onclick = (e) => { e.stopPropagation(); loadPersonToForm(p); closeAllDropdowns(); };
             const delBtn = document.createElement('button'); delBtn.textContent = '🗑️ ডিলিট'; delBtn.onclick = (e) => { e.stopPropagation(); deletePersonWithPassword(p.id); closeAllDropdowns(); };
             dd.append(callBtn, waBtn, editBtn, delBtn);
@@ -200,33 +180,19 @@
         updateStats();
     }
 
-    // ---------- ফর্ম নিয়ন্ত্রণ ----------
+    // ফর্ম
     function toggleForm(show) { document.getElementById('formCard').classList.toggle('show', show); }
     function resetFormToAddMode() {
-        document.getElementById('peopleForm').reset();
-        document.getElementById('editId').value = '';
-        document.getElementById('formTitle').innerHTML = '➕ নতুন সদস্য যোগ করুন';
-        document.getElementById('submitBtn').innerHTML = '➕ যোগ করুন';
-        document.getElementById('cancelEditBtn').style.display = 'none';
-        document.getElementById('phoneHint').innerHTML = '';
+        document.getElementById('peopleForm').reset(); document.getElementById('editId').value = ''; document.getElementById('formTitle').innerHTML = '➕ নতুন সদস্য যোগ করুন'; document.getElementById('submitBtn').innerHTML = '➕ যোগ করুন'; document.getElementById('cancelEditBtn').style.display = 'none'; document.getElementById('phoneHint').innerHTML = '';
     }
     function loadPersonToForm(p) {
-        document.getElementById('name').value = p.name;
-        document.getElementById('phone').value = p.phone;
-        validatePhoneField();
-        document.getElementById('area').value = p.area || '';
-        document.getElementById('role').value = p.role || '';
-        document.getElementById('cluster').value = p.cluster || '';
-        document.getElementById('note').value = p.note || '';
-        document.getElementById('editId').value = p.id;
-        document.getElementById('formTitle').innerHTML = '✏️ সদস্য এডিট করুন';
-        document.getElementById('submitBtn').innerHTML = '💾 আপডেট করুন';
-        document.getElementById('cancelEditBtn').style.display = 'inline-block';
-        toggleForm(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('name').value = p.name; document.getElementById('phone').value = p.phone; validatePhoneField();
+        document.getElementById('area').value = p.area||''; document.getElementById('role').value = p.role||''; document.getElementById('cluster').value = p.cluster||''; document.getElementById('note').value = p.note||'';
+        document.getElementById('editId').value = p.id; document.getElementById('formTitle').innerHTML = '✏️ সদস্য এডিট করুন'; document.getElementById('submitBtn').innerHTML = '💾 আপডেট করুন'; document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        toggleForm(true); window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ---------- পাসওয়ার্ড সুরক্ষিত ডিলিট ও রিসেট ----------
+    // পাসওয়ার্ড
     function verifyPassword(action) { return prompt(`🔐 ${action} করতে পাসওয়ার্ড দিন:`) === ADMIN_PASSWORD; }
     async function deletePersonWithPassword(id) {
         if (!verifyPassword("ডিলিট")) { alert("ভুল পাসওয়ার্ড!"); return; }
@@ -240,42 +206,65 @@
     async function resetDataWithPassword() {
         if (!verifyPassword("ডেটা রিসেট")) { alert("ভুল পাসওয়ার্ড!"); return; }
         if (!confirm('সব ডেটা ডিফল্টে রিসেট হবে। নিশ্চিত?')) return;
-        loadDefaultData();
-        saveToStorage(); rebuildFuse(); populateFilters(); renderTable(); resetFormToAddMode(); toggleForm(false);
+        loadDefaultData(); saveToStorage(); rebuildFuse(); populateFilters(); renderTable(); resetFormToAddMode(); toggleForm(false);
         alert("ডেটা ডিফল্টে রিসেট করা হয়েছে।");
         if (confirm("শীটেও কি ডিফল্ট ডেটা আপলোড করবেন?")) pushToSheets();
     }
 
-    // ---------- ফিল্টার অপশন পপুলেট ----------
     function populateFilters() {
-        const roles = [...new Set(peopleData.map(p => p.role).filter(r => r && r.trim()))];
-        const areas = [...new Set(peopleData.map(p => p.area).filter(a => a && a.trim()))];
-        const clusters = [...new Set(peopleData.map(p => p.cluster).filter(c => c && c.trim()))];
+        const roles = [...new Set(peopleData.map(p=>p.role).filter(r=>r&&r.trim()))];
+        const areas = [...new Set(peopleData.map(p=>p.area).filter(a=>a&&a.trim()))];
+        const clusters = [...new Set(peopleData.map(p=>p.cluster).filter(c=>c&&c.trim()))];
         const roleSel = document.getElementById('filterRole'), areaSel = document.getElementById('filterArea'), clusterSel = document.getElementById('filterCluster');
-        roleSel.innerHTML = '<option value="">সব রোল</option>';
-        areaSel.innerHTML = '<option value="">সব এলাকা</option>';
-        clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
-        roles.forEach(r => { let opt = document.createElement('option'); opt.value = r; opt.text = r; roleSel.appendChild(opt); });
-        areas.forEach(a => { let opt = document.createElement('option'); opt.value = a; opt.text = a; areaSel.appendChild(opt); });
-        clusters.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; clusterSel.appendChild(opt); });
+        roleSel.innerHTML = '<option value="">সব রোল</option>'; areaSel.innerHTML = '<option value="">সব এলাকা</option>'; clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
+        roles.forEach(r=>{let opt=document.createElement('option'); opt.value=r; opt.text=r; roleSel.appendChild(opt);});
+        areas.forEach(a=>{let opt=document.createElement('option'); opt.value=a; opt.text=a; areaSel.appendChild(opt);});
+        clusters.forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.text=c; clusterSel.appendChild(opt);});
     }
 
-    // ---------- শীট API কল ----------
+    // ---------- শীট API কল (CORS-সচেতন) ----------
     async function callSheetsAPI(action, payload = null) {
         const url = SHEETS_API_URL;
         if (!url) throw new Error('API URL নেই');
         const params = new URLSearchParams({ action });
-        let fetchUrl = `${url}?${params.toString()}`;
-        let options = { method: 'GET', mode: 'cors' };
-        if (payload) {
-            options = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), mode: 'cors' };
-            fetchUrl = `${url}?${params.toString()}`;
+        // GET request (fetch) - JSONP পদ্ধতি ব্যবহার করি CORS বাইপাস করতে
+        if (!payload) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Date.now() + '_' + Math.floor(Math.random()*100000);
+                const script = document.createElement('script');
+                const timeout = setTimeout(() => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('JSONP timeout'));
+                }, 10000);
+                window[callbackName] = (data) => {
+                    clearTimeout(timeout);
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+                script.src = `${url}?${params.toString()}&callback=${callbackName}`;
+                script.onerror = () => {
+                    clearTimeout(timeout);
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('JSONP load error (CORS?)'));
+                };
+                document.body.appendChild(script);
+            });
+        } else {
+            // POST request - আমরা সরাসরি fetch চেষ্টা করব, CORS হেডার প্রয়োজন
+            const response = await fetch(`${url}?${params.toString()}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                mode: 'cors'
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+            return data;
         }
-        const res = await fetch(fetchUrl, options);
-        if (!res.ok) { const txt = await res.text(); throw new Error(`HTTP ${res.status}: ${txt.substring(0,100)}`); }
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        return data;
     }
 
     async function testUrl() {
@@ -284,9 +273,11 @@
             const result = await callSheetsAPI('fetch');
             alert(`সফল! ${result.length}টি রেকর্ড পাওয়া গেছে।`);
             updateSyncStatus('✅ URL সঠিক');
+            document.getElementById('corsWarning').style.display = 'none';
         } catch(err) {
-            alert(`URL ব্যর্থ:\n${err.message}\n\nনিশ্চিত করুন:\n1. Web App "Anyone" অ্যাক্সেস দিয়ে ডিপ্লয় করা হয়েছে\n2. URL সঠিক\n3. ব্রাউজার কনসোল দেখুন (F12)`);
+            alert(`URL ব্যর্থ:\n${err.message}\n\nসমাধান: Apps Script Web App পুনরায় ডিপ্লয় করুন "Execute as: Me" ও "Access: Anyone" দিয়ে।`);
             updateSyncStatus('❌ URL ত্রুটি');
+            document.getElementById('corsWarning').style.display = 'block';
         } finally { hideLoading(); }
     }
 
@@ -322,7 +313,6 @@
         finally { hideLoading(); }
     }
 
-    // ---------- যোগ/এডিট সেভ ----------
     async function savePerson(e) {
         e.preventDefault();
         const name = document.getElementById('name').value.trim();
@@ -332,17 +322,10 @@
         if (!isValidIndianPhone(rawPhone)) return alert('ভারতীয় মোবাইল নম্বর দিন (10 ডিজিট, 6/7/8/9 দিয়ে শুরু)');
         const editId = document.getElementById('editId').value;
         const cleanedPhone = cleanIndianPhone(rawPhone);
-        // এডিট মোডে ফোন অপরিবর্তিত থাকলে ডুপ্লিকেট চেক স্কিপ
         let isEditingSamePhone = false;
-        if (editId) {
-            const curr = peopleData.find(p => p.id == editId);
-            if (curr && cleanIndianPhone(curr.phone) === cleanedPhone) isEditingSamePhone = true;
-        }
+        if (editId) { const curr = peopleData.find(p => p.id == editId); if (curr && cleanIndianPhone(curr.phone) === cleanedPhone) isEditingSamePhone = true; }
         if (!isEditingSamePhone && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) return alert('এই ফোন নম্বরটি আগে থেকেই আছে!');
-        const area = document.getElementById('area').value.trim();
-        const role = document.getElementById('role').value.trim();
-        const cluster = document.getElementById('cluster').value.trim();
-        const note = document.getElementById('note').value.trim();
+        const area = document.getElementById('area').value.trim(), role = document.getElementById('role').value.trim(), cluster = document.getElementById('cluster').value.trim(), note = document.getElementById('note').value.trim();
         if (!editId) {
             const newId = peopleData.length ? Math.max(...peopleData.map(p => p.id)) + 1 : 1;
             peopleData.push({ id: newId, name, phone: cleanedPhone, area, role, cluster, note });
@@ -355,77 +338,28 @@
         if (confirm("শীটেও কি এই পরিবর্তন সংরক্ষণ করবেন?")) pushToSheets();
     }
 
-    // ---------- ইমপোর্ট/এক্সপোর্ট ও ডিফল্ট ডেটা ----------
-    function exportToJSON() {
-        const dataStr = JSON.stringify(peopleData, null, 2);
-        const blob = new Blob([dataStr], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `people_backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
-        URL.revokeObjectURL(url);
-    }
-    function importFromJSON(file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-            try {
-                const imported = JSON.parse(ev.target.result);
-                if (Array.isArray(imported)) {
-                    peopleData = imported.map((p, idx) => ({ ...p, id: p.id || idx+1 }));
-                    saveToStorage(); rebuildFuse(); populateFilters(); renderTable();
-                    alert('✅ ইমপোর্ট সফল!');
-                    if (confirm('ইমপোর্ট করা ডেটা শীটে আপলোড করবেন?')) pushToSheets();
-                } else throw new Error();
-            } catch(e) { alert('ভুল JSON ফাইল'); }
-        };
-        reader.readAsText(file);
-    }
-    function backupReminder() {
-        const last = localStorage.getItem(LAST_BACKUP_KEY);
-        const now = Date.now();
-        if (last && (now - parseInt(last)) / (1000*3600*24) < BACKUP_INTERVAL_DAYS) alert(`গত ${BACKUP_INTERVAL_DAYS} দিনের মধ্যে ব্যাকআপ নেওয়া আছে।`);
-        const dataStr = JSON.stringify(peopleData, null, 2);
-        const blob = new Blob([dataStr], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `drive_backup_${new Date().toISOString().slice(0,10)}.json`; a.click();
-        URL.revokeObjectURL(url);
-        localStorage.setItem(LAST_BACKUP_KEY, now.toString());
-        alert("📁 ব্যাকআপ JSON ডাউনলোড হয়েছে। গুগল ড্রাইভে আপলোড করে রাখুন। ৭ দিন পর আবার রিমাইন্ডার দেখাবে।");
-    }
-    function loadDefaultData() {
-        peopleData = [
-            { id: 1, name: "রাহুল শর্মা", phone: "9876543210", area: "দিল্লি", role: "সদস্য", cluster: "উত্তর", note: "সক্রিয়" },
-            { id: 2, name: "প্রিয়া সিং", phone: "9988776655", area: "মুম্বই", role: "নেত্রী", cluster: "পশ্চিম", note: "নতুন যোগদান" }
-        ];
-        saveToStorage();
-    }
+    function exportToJSON() { const dataStr = JSON.stringify(peopleData, null, 2); const blob = new Blob([dataStr], {type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `people_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(url); }
+    function importFromJSON(file) { const reader = new FileReader(); reader.onload = ev => { try { const imported = JSON.parse(ev.target.result); if (Array.isArray(imported)) { peopleData = imported.map((p, idx) => ({ ...p, id: p.id || idx+1 })); saveToStorage(); rebuildFuse(); populateFilters(); renderTable(); alert('✅ ইমপোর্ট সফল!'); if (confirm('ইমপোর্ট করা ডেটা শীটে আপলোড করবেন?')) pushToSheets(); } else throw new Error(); } catch(e) { alert('ভুল JSON ফাইল'); } }; reader.readAsText(file); }
+    function backupReminder() { const last = localStorage.getItem(LAST_BACKUP_KEY); const now = Date.now(); if (last && (now - parseInt(last)) / (1000*3600*24) < BACKUP_INTERVAL_DAYS) alert(`গত ${BACKUP_INTERVAL_DAYS} দিনের মধ্যে ব্যাকআপ নেওয়া আছে।`); const dataStr = JSON.stringify(peopleData, null, 2); const blob = new Blob([dataStr], {type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `drive_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(url); localStorage.setItem(LAST_BACKUP_KEY, now.toString()); alert("📁 ব্যাকআপ JSON ডাউনলোড হয়েছে। গুগল ড্রাইভে আপলোড করে রাখুন।"); }
+    function loadDefaultData() { peopleData = [ { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়" }, { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন যোগদান" } ]; saveToStorage(); }
 
-    // ---------- আরম্ভ ----------
-    async function initData() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) peopleData = JSON.parse(stored);
-        else loadDefaultData();
-        peopleData.sort((a,b) => a.id - b.id);
-        rebuildFuse(); populateFilters(); renderTable();
-        // স্বয়ংক্রিয়ভাবে শীট থেকে ডেটা আনতে চাইলে কমেন্ট খুলুন:
-        // if (confirm('শীট থেকে সর্বশেষ ডেটা আনবেন?')) pullFromSheets();
-    }
+    async function initData() { const stored = localStorage.getItem(STORAGE_KEY); if(stored) peopleData = JSON.parse(stored); else loadDefaultData(); peopleData.sort((a,b)=>a.id-b.id); rebuildFuse(); populateFilters(); renderTable(); }
 
-    // ---------- ইভেন্ট লিসেনার ----------
-    document.getElementById('toggleFormBtn').addEventListener('click', () => toggleForm(true));
+    document.getElementById('toggleFormBtn').addEventListener('click', ()=>toggleForm(true));
     document.getElementById('peopleForm').addEventListener('submit', savePerson);
-    document.getElementById('cancelEditBtn').addEventListener('click', () => { resetFormToAddMode(); toggleForm(false); });
-    document.getElementById('searchBox').addEventListener('input', () => renderTable());
-    document.getElementById('filterRole').addEventListener('change', () => renderTable());
-    document.getElementById('filterArea').addEventListener('change', () => renderTable());
-    document.getElementById('filterCluster').addEventListener('change', () => renderTable());
+    document.getElementById('cancelEditBtn').addEventListener('click', ()=>{ resetFormToAddMode(); toggleForm(false); });
+    document.getElementById('searchBox').addEventListener('input', ()=>renderTable());
+    document.getElementById('filterRole').addEventListener('change', ()=>renderTable());
+    document.getElementById('filterArea').addEventListener('change', ()=>renderTable());
+    document.getElementById('filterCluster').addEventListener('change', ()=>renderTable());
     document.getElementById('exportBtn').addEventListener('click', exportToJSON);
-    document.getElementById('importFile').addEventListener('change', (e) => { if (e.target.files.length) importFromJSON(e.target.files[0]); e.target.value = ''; });
+    document.getElementById('importFile').addEventListener('change', (e)=>{ if(e.target.files.length) importFromJSON(e.target.files[0]); e.target.value=''; });
     document.getElementById('resetDataBtn').addEventListener('click', resetDataWithPassword);
     document.getElementById('backupReminderBtn').addEventListener('click', backupReminder);
     document.getElementById('phone').addEventListener('input', validatePhoneField);
     document.getElementById('pullFromSheetsBtn').addEventListener('click', pullFromSheets);
     document.getElementById('pushToSheetsBtn').addEventListener('click', pushToSheets);
     document.getElementById('testUrlBtn').addEventListener('click', testUrl);
-
     initData();
 </script>
 </body>
