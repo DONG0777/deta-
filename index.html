@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>প্রো পিপল ম্যানেজার - গুগল শীট সংস্করণ</title>
-    <!-- Fuse.js for fuzzy search -->
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
         * {
@@ -307,7 +306,6 @@
         <div class="lock-badge">🔐 ডিলিট/রিসেটে পাসওয়ার্ড লাগে</div>
     </div>
 
-    <!-- Sync config bar (just for status, no URL input needed because it's hardcoded) -->
     <div class="card sync-config">
         <span>📡 গুগল শীট সিঙ্ক (অটো সংযুক্ত)</span>
         <button id="pullFromSheetsBtn" class="btn btn-success">📥 শীট থেকে টেনে আনুন</button>
@@ -392,18 +390,15 @@
     // ------------------------------
     //  CONFIGURATION
     // ------------------------------
-    const ADMIN_PASSWORD = "admin123";   // change if needed
+    const ADMIN_PASSWORD = "admin123";
     const STORAGE_KEY = "peopleManagerData";
     const BACKUP_INTERVAL_DAYS = 7;
     const LAST_BACKUP_KEY = "lastDriveBackup";
-
-    // ---------- HARDCODED GOOGLE APPS SCRIPT URL ----------
     const SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbyFa1EKDWz4TAUwHSu5kjcYqmSQy-FLuk5n5BQJvfoZZ8q38hRtxqoqaBni7CwEwozZ/exec";
 
     let peopleData = [];
     let fuseInstance = null;
 
-    // Helper loading overlay
     function showLoading(message = "লোড হচ্ছে...") {
         let overlay = document.querySelector('.loading-overlay');
         if (!overlay) {
@@ -421,7 +416,7 @@
         if (overlay) overlay.style.display = 'none';
     }
 
-    // ---------- Google Sheets API calls ----------
+    // ---------- Google Sheets API ----------
     async function callSheetsAPI(action, payload = null) {
         const url = SHEETS_API_URL;
         if (!url) throw new Error('Apps Script URL নেই');
@@ -500,7 +495,7 @@
         setTimeout(() => { if(span.innerText === msg) span.innerText = ''; }, 4000);
     }
 
-    // ---------- Core functions (local storage + utils) ----------
+    // ---------- Core functions ----------
     function cleanIndianPhone(phone) {
         let cleaned = String(phone).replace(/[\s\-\(\)]/g, '');
         if (cleaned.startsWith('+91')) cleaned = cleaned.slice(3);
@@ -513,13 +508,16 @@
         const cleaned = cleanIndianPhone(phone);
         return /^[6-9]\d{9}$/.test(cleaned);
     }
+    
+    // improved duplicate check with proper exclusion
     function isDuplicatePhone(phone, excludeId = null) {
         const cleaned = cleanIndianPhone(phone);
         return peopleData.some(p => {
-            if (excludeId && p.id == excludeId) return false;
+            if (excludeId !== null && p.id == excludeId) return false;
             return cleanIndianPhone(p.phone) === cleaned;
         });
     }
+    
     function validatePhoneField() {
         const input = document.getElementById('phone');
         const hint = document.getElementById('phoneHint');
@@ -625,7 +623,6 @@
             renderTable();
             if (document.getElementById('editId').value == id) resetFormToAddMode();
             alert("✅ ডিলিট হয়েছে।");
-            // optionally push to sheets after delete
             if (confirm("শীটেও কি এই পরিবর্তন সংরক্ষণ করবেন?")) pushToSheets();
         }
     }
@@ -702,19 +699,36 @@
         if (!name) return alert('নাম দিন');
         if (!rawPhone) return alert('ফোন দিন');
         if (!isValidIndianPhone(rawPhone)) return alert('ভারতীয় মোবাইল নম্বর দিন (10 ডিজিট, 6/7/8/9 দিয়ে শুরু)');
+        
         const editId = document.getElementById('editId').value;
-        if (isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) return alert('এই ফোন নম্বরটি আগে থেকেই আছে!');
         const cleanedPhone = cleanIndianPhone(rawPhone);
+        
+        // এডিট মোডে এবং ফোন নম্বর অপরিবর্তিত থাকলে ডুপ্লিকেট চেক বাইপাস
+        let isEditingSamePhone = false;
+        if (editId) {
+            const currentPerson = peopleData.find(p => p.id == editId);
+            if (currentPerson && cleanIndianPhone(currentPerson.phone) === cleanedPhone) {
+                isEditingSamePhone = true;
+            }
+        }
+        
+        if (!isEditingSamePhone && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) {
+            return alert('এই ফোন নম্বরটি আগে থেকেই আছে!');
+        }
+        
         const area = document.getElementById('area').value.trim();
         const role = document.getElementById('role').value.trim();
         const cluster = document.getElementById('cluster').value.trim();
         const note = document.getElementById('note').value.trim();
+        
         if (!editId) {
             const newId = peopleData.length ? Math.max(...peopleData.map(p => p.id)) + 1 : 1;
             peopleData.push({ id: newId, name, phone: cleanedPhone, area, role, cluster, note });
         } else {
             const idx = peopleData.findIndex(p => p.id == editId);
-            if (idx !== -1) peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
+            if (idx !== -1) {
+                peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
+            }
             resetFormToAddMode();
         }
         saveToStorage();
@@ -794,7 +808,6 @@
         rebuildFuse();
         populateFilters();
         renderTable();
-        // auto pull from sheets if user wants (optional)
         if (confirm('শীট থেকে সর্বশেষ ডেটা আনবেন? (পুল করুন)')) pullFromSheets();
     }
 
