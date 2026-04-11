@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>প্রো পিপল ম্যানেজার | কার্ড ভিউ + CSV এক্সপোর্ট</title>
+    <title>প্রো CRM পিপল ম্যানেজার | টাস্ক ও ফলোআপ</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
         * {
@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
@@ -49,7 +49,6 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
         .card {
@@ -62,7 +61,6 @@
 
         .form-card {
             display: none;
-            background: #ffffff;
         }
         .form-card.show {
             display: block;
@@ -90,10 +88,10 @@
             color: #2c4c6e;
         }
         input, select, textarea {
-            padding: 14px 16px;
+            padding: 12px 16px;
             border: 1.5px solid #e2edf7;
             border-radius: 28px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             background: white;
         }
         input:focus, select:focus, textarea:focus {
@@ -109,77 +107,65 @@
         .invalid { color: #ef4444; }
 
         .btn {
-            padding: 12px 20px;
-            border-radius: 60px;
+            padding: 10px 18px;
+            border-radius: 40px;
             font-weight: 700;
             border: none;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
         }
-        .btn-primary {
-            background: linear-gradient(105deg, #2563eb, #1d4ed8);
-            color: white;
-            box-shadow: 0 4px 10px rgba(37,99,235,0.3);
-        }
-        .btn-success {
-            background: linear-gradient(105deg, #10b981, #059669);
-            color: white;
-        }
-        .btn-danger {
-            background: linear-gradient(105deg, #ef4444, #dc2626);
-            color: white;
-        }
-        .btn-warning {
-            background: linear-gradient(105deg, #f59e0b, #d97706);
-            color: white;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid #cbd5e6;
-        }
-        .btn-new {
-            width: 100%;
-            background: linear-gradient(105deg, #1e2f3f, #0f212f);
-            color: white;
-            padding: 14px;
-            font-size: 1rem;
-            margin-bottom: 8px;
-        }
-        .btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 16px;
-            justify-content: center;
-        }
+        .btn-primary { background: linear-gradient(105deg, #2563eb, #1d4ed8); color: white; }
+        .btn-success { background: linear-gradient(105deg, #10b981, #059669); color: white; }
+        .btn-danger { background: linear-gradient(105deg, #ef4444, #dc2626); color: white; }
+        .btn-warning { background: linear-gradient(105deg, #f59e0b, #d97706); color: white; }
+        .btn-outline { background: transparent; border: 1.5px solid #cbd5e6; }
+        .btn-new { width: 100%; background: linear-gradient(105deg, #1e2f3f, #0f212f); color: white; padding: 14px; font-size: 1rem; margin-bottom: 8px; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; justify-content: center; }
         button:active { transform: scale(0.97); }
 
         .search-box {
             width: 100%;
-            padding: 14px 20px;
+            padding: 12px 20px;
             border-radius: 60px;
             border: 1.5px solid #e2edf7;
             font-size: 1rem;
-            background: white;
             margin-bottom: 1rem;
         }
         .filters {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
         .filters select {
             flex: 1;
             min-width: 110px;
-            background: white;
         }
 
+        .view-toggle {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+        .view-btn {
+            background: #eef2f8;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .view-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* গ্রিড ভিউ (কার্ড) */
         .people-grid {
             display: flex;
             flex-direction: column;
@@ -190,7 +176,7 @@
             border-radius: 28px;
             padding: 18px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,0,0,0.03);
+            transition: 0.2s;
         }
         .card-header {
             display: flex;
@@ -200,14 +186,13 @@
             margin-bottom: 12px;
         }
         .person-name {
-            font-size: 1.35rem;
+            font-size: 1.3rem;
             font-weight: 800;
             color: #0f2b3d;
         }
         .person-phone {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            color: #2563eb;
             background: #eef2ff;
             padding: 4px 12px;
             border-radius: 40px;
@@ -215,45 +200,79 @@
         .detail-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            margin: 12px 0;
-            font-size: 0.85rem;
-            color: #334155;
+            gap: 10px;
+            margin: 10px 0;
         }
         .detail-badge {
             background: #f1f5f9;
-            padding: 6px 14px;
+            padding: 4px 12px;
             border-radius: 40px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .note-text {
-            background: #fefce8;
-            padding: 10px 14px;
-            border-radius: 20px;
-            margin-top: 10px;
             font-size: 0.8rem;
-            color: #5b4e1e;
         }
+        .tasks-section, .call-logs-section {
+            margin-top: 12px;
+            background: #fafcff;
+            border-radius: 20px;
+            padding: 10px;
+        }
+        .task-item, .call-item {
+            background: white;
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #3b82f6;
+            font-size: 0.8rem;
+        }
+        .task-done { border-left-color: #10b981; opacity: 0.7; text-decoration: line-through; }
+        .followup-required { background: #fee2e2; border-left-color: #ef4444; }
         .card-actions {
             display: flex;
             justify-content: flex-end;
             gap: 12px;
-            margin-top: 14px;
+            margin-top: 12px;
             border-top: 1px solid #eef2f8;
-            padding-top: 14px;
+            padding-top: 12px;
         }
         .icon-btn {
             background: none;
             border: none;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             cursor: pointer;
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 40px;
-            transition: 0.1s;
         }
         .icon-btn:hover { background: #f1f5f9; }
+
+        /* লিস্ট ভিউ (টেবিল) */
+        .list-view {
+            overflow-x: auto;
+            display: none;
+        }
+        .list-view.active {
+            display: block;
+        }
+        .grid-view {
+            display: block;
+        }
+        .grid-view.hide {
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #eef2f8;
+            font-size: 0.8rem;
+        }
+        th {
+            background: #f8fafc;
+        }
 
         .stats-row {
             display: flex;
@@ -263,81 +282,98 @@
         .stat-card {
             background: white;
             border-radius: 28px;
-            padding: 12px 16px;
+            padding: 10px 16px;
             flex: 1;
             text-align: center;
         }
         .stat-number {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #2563eb;
         }
 
         .highlight {
             background-color: #fef08a;
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 0 2px;
         }
         @media (max-width: 550px) {
-            body { padding: 16px 12px; }
-            .card { padding: 1.2rem; }
+            body { padding: 12px; }
+            .card { padding: 1rem; }
+            th, td { padding: 8px 4px; }
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>👥 প্রো পিপল ম্যানেজার</h1>
+        <h1>👥 প্রো CRM পিপল ম্যানেজার</h1>
         <div class="lock-badge">🔐 ডিলিট/রিসেটে পাসওয়ার্ড</div>
     </div>
 
     <button id="toggleFormBtn" class="btn btn-new">➕ নতুন সদস্য যোগ করুন</button>
 
+    <!-- ফর্ম -->
     <div id="formCard" class="card form-card">
         <h2 id="formTitle" style="margin-bottom: 1rem;">➕ নতুন সদস্য</h2>
         <form id="peopleForm">
             <div class="form-grid">
-                <div class="form-group"><label>নাম *</label><input type="text" id="name" required autocomplete="off" placeholder="পূর্ণ নাম"></div>
-                <div class="form-group"><label>ফোন * (ভারতীয়)</label><input type="tel" id="phone" required autocomplete="off" placeholder="10 ডিজিট"><span id="phoneHint" class="phone-hint"></span></div>
-                <div class="form-group"><label>এলাকা</label><input type="text" id="area" placeholder="যেমন: কলকাতা"></div>
-                <div class="form-group"><label>রোল</label><input type="text" id="role" placeholder="সদস্য/নেত্রী"></div>
-                <div class="form-group"><label>ক্লাস্টার</label><input type="text" id="cluster" placeholder="উত্তর/দক্ষিণ"></div>
-                <div class="form-group"><label>নোট</label><textarea id="note" rows="2" placeholder="বিশেষ তথ্য..."></textarea></div>
+                <div class="form-group"><label>নাম *</label><input type="text" id="name" required></div>
+                <div class="form-group"><label>ফোন * (ভারতীয়)</label><input type="tel" id="phone" required><span id="phoneHint" class="phone-hint"></span></div>
+                <div class="form-group"><label>এলাকা</label><input type="text" id="area"></div>
+                <div class="form-group"><label>রোল</label><input type="text" id="role"></div>
+                <div class="form-group"><label>ক্লাস্টার</label><input type="text" id="cluster"></div>
+                <div class="form-group"><label>নোট (সাধারণ)</label><textarea id="note" rows="2"></textarea></div>
             </div>
             <div class="btn-group"><button type="submit" class="btn btn-success" id="submitBtn">💾 সংরক্ষণ</button><button type="button" id="cancelEditBtn" class="btn btn-outline" style="display:none;">বাতিল</button></div>
             <input type="hidden" id="editId" value="">
         </form>
     </div>
 
+    <!-- প্রধান প্যানেল -->
     <div class="card" style="padding: 1.2rem;">
-        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, এলাকা দিয়ে খুঁজুন...">
+        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, এলাকা, টাস্ক...">
         <div class="filters">
             <select id="filterRole"><option value="">সব রোল</option></select>
             <select id="filterArea"><option value="">সব এলাকা</option></select>
             <select id="filterCluster"><option value="">সব ক্লাস্টার</option></select>
+            <select id="filterFollowup"><option value="">ফলোআপ প্রয়োজন</option><option value="yes">হ্যাঁ</option><option value="no">না</option></select>
         </div>
+
+        <div class="view-toggle">
+            <button class="view-btn active" data-view="grid">📱 কার্ড ভিউ</button>
+            <button class="view-btn" data-view="list">📋 লিস্ট ভিউ</button>
+        </div>
+
         <div class="stats-row">
             <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>মোট সদস্য</div></div>
             <div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>দেখানো হচ্ছে</div></div>
+            <div class="stat-card"><div class="stat-number" id="followupCount">0</div><div>ফলোআপ প্রয়োজন</div></div>
         </div>
 
-        <div id="peopleGrid" class="people-grid"></div>
+        <div id="gridView" class="people-grid grid-view"></div>
+        <div id="listView" class="list-view">
+            <table>
+                <thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>টাস্ক</th><th>ফলোআপ</th><th></th></tr></thead>
+                <tbody id="listTableBody"></tbody>
+            </table>
+        </div>
 
-        <div class="btn-group" style="margin-top: 24px; justify-content: center;">
-            <button id="exportCsvBtn" class="btn btn-primary">📎 CSV (শীট আকারে)</button>
-            <button id="exportBtn" class="btn btn-warning">📁 JSON ডাউনলোড</button>
-            <label for="importFile" class="btn btn-outline" style="cursor:pointer;">📂 JSON আপলোড</label>
+        <div class="btn-group" style="margin-top: 24px;">
+            <button id="exportCsvBtn" class="btn btn-primary">📎 CSV (শীট)</button>
+            <button id="exportBtn" class="btn btn-warning">📁 JSON ব্যাকআপ</button>
+            <label for="importFile" class="btn btn-outline" style="cursor:pointer;">📂 JSON ইমপোর্ট</label>
             <input type="file" id="importFile" accept=".json" style="display:none;">
             <button id="resetDataBtn" class="btn btn-danger">🔄 রিসেট</button>
         </div>
-        <p style="font-size: 0.7rem; text-align: center; margin-top: 16px; color: #6c86a3;">📌 CSV ফাইল গুগল শীট বা এক্সেলে খুলুন। JSON ব্যাকআপ হিসাবে রাখুন।</p>
     </div>
 </div>
 
 <script>
     const ADMIN_PASSWORD = "admin123";
-    const STORAGE_KEY = "peopleManagerData";
+    const STORAGE_KEY = "crmPeopleData";
 
+    // ডেটা স্ট্রাকচার: প্রতিটি person এর মধ্যে tasks এবং callLogs অ্যারে থাকবে
     let peopleData = [];
     let fuseInstance = null;
 
@@ -350,16 +386,14 @@
         cleaned = cleaned.replace(/\D/g, '');
         return cleaned;
     }
-    function isValidIndianPhone(phone) {
-        return /^[6-9]\d{9}$/.test(cleanIndianPhone(phone));
-    }
+    function isValidIndianPhone(phone) { return /^[6-9]\d{9}$/.test(cleanIndianPhone(phone)); }
     function validatePhoneField() {
         const inp = document.getElementById('phone');
         const hint = document.getElementById('phoneHint');
         const raw = inp.value;
         if (!raw) { hint.innerHTML = ''; return false; }
         const valid = isValidIndianPhone(raw);
-        hint.innerHTML = valid ? '✓ বৈধ ভারতীয় মোবাইল' : '✗ ১০ ডিজিট, 6/7/8/9 দিয়ে শুরু';
+        hint.innerHTML = valid ? '✓ বৈধ' : '✗ 10 ডিজিট, 6/7/8/9 দিয়ে শুরু';
         hint.className = valid ? 'phone-hint valid' : 'phone-hint invalid';
         return valid;
     }
@@ -371,44 +405,99 @@
         });
     }
 
-    // স্টোরেজ ও রেন্ডার
+    // হেল্পার
     function saveToStorage() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData));
         updateStatsAndRender();
     }
     function rebuildFuse() {
         fuseInstance = new Fuse(peopleData, {
-            keys: ['name', 'phone', 'area', 'role', 'cluster', 'note'],
+            keys: ['name', 'phone', 'area', 'role', 'cluster', 'note', 'tasks.title'],
             threshold: 0.3,
             includeMatches: true
         });
     }
+
     function getFilteredData() {
         let filtered = peopleData;
         const query = document.getElementById('searchBox').value.trim();
-        if (query) filtered = fuseInstance.search(query).map(r => r.item);
+        if (query) {
+            const results = fuseInstance.search(query);
+            filtered = results.map(r => r.item);
+        }
         const role = document.getElementById('filterRole').value;
         const area = document.getElementById('filterArea').value;
         const cluster = document.getElementById('filterCluster').value;
+        const followup = document.getElementById('filterFollowup').value;
         if (role) filtered = filtered.filter(p => p.role === role);
         if (area) filtered = filtered.filter(p => p.area === area);
         if (cluster) filtered = filtered.filter(p => p.cluster === cluster);
+        if (followup === 'yes') filtered = filtered.filter(p => p.needFollowup === true);
+        if (followup === 'no') filtered = filtered.filter(p => !p.needFollowup);
         return filtered;
     }
+
     function highlightText(text, query) {
         if (!query || !text) return text || '';
         const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return text.replace(regex, `<span class="highlight">$1</span>`);
     }
 
+    // টাস্ক ও কল লগ ম্যানেজমেন্ট
+    function addTask(personId, taskTitle, dueDate = '') {
+        const person = peopleData.find(p => p.id == personId);
+        if (!person) return;
+        if (!person.tasks) person.tasks = [];
+        person.tasks.push({ id: Date.now(), title: taskTitle, done: false, dueDate: dueDate });
+        saveToStorage();
+    }
+    function toggleTaskDone(personId, taskId) {
+        const person = peopleData.find(p => p.id == personId);
+        const task = person?.tasks?.find(t => t.id == taskId);
+        if (task) { task.done = !task.done; saveToStorage(); }
+    }
+    function deleteTask(personId, taskId) {
+        const person = peopleData.find(p => p.id == personId);
+        if (person && person.tasks) {
+            person.tasks = person.tasks.filter(t => t.id != taskId);
+            saveToStorage();
+        }
+    }
+    function addCallLog(personId, note, needFollowup) {
+        const person = peopleData.find(p => p.id == personId);
+        if (!person) return;
+        if (!person.callLogs) person.callLogs = [];
+        person.callLogs.push({ date: new Date().toLocaleString(), note: note, followup: needFollowup });
+        if (needFollowup) person.needFollowup = true;
+        saveToStorage();
+    }
+    function clearFollowup(personId) {
+        const person = peopleData.find(p => p.id == personId);
+        if (person) { person.needFollowup = false; saveToStorage(); }
+    }
+
+    // রেন্ডারিং (কার্ড ও লিস্ট)
+    let currentView = 'grid';
+    function render() {
+        if (currentView === 'grid') renderGrid();
+        else renderList();
+        updateStats();
+    }
+    function updateStats() {
+        const filtered = getFilteredData();
+        document.getElementById('filteredCount').innerText = filtered.length;
+        document.getElementById('totalCount').innerText = peopleData.length;
+        const followupNeeded = peopleData.filter(p => p.needFollowup === true).length;
+        document.getElementById('followupCount').innerText = followupNeeded;
+    }
+
     function renderGrid() {
         const filtered = getFilteredData();
-        const grid = document.getElementById('peopleGrid');
+        const grid = document.getElementById('gridView');
         grid.innerHTML = '';
         const query = document.getElementById('searchBox').value.trim();
         if (filtered.length === 0) {
-            grid.innerHTML = '<div style="text-align:center; padding:40px; color:#7f8c8d;">😞 কোনো সদস্য খুঁজে পাওয়া যায়নি</div>';
-            document.getElementById('filteredCount').innerText = 0;
+            grid.innerHTML = '<div style="text-align:center; padding:40px;">😞 কোনো সদস্য নেই</div>';
             return;
         }
         filtered.forEach(person => {
@@ -419,88 +508,141 @@
             const areaHtml = highlightText(person.area || '', query);
             const roleHtml = highlightText(person.role || '', query);
             const clusterHtml = highlightText(person.cluster || '', query);
-            const noteHtml = highlightText(person.note || '', query);
+            // টাস্ক লিস্ট
+            let tasksHtml = '';
+            if (person.tasks && person.tasks.length) {
+                tasksHtml = `<div class="tasks-section"><strong>📋 টাস্ক:</strong>`;
+                person.tasks.forEach(t => {
+                    tasksHtml += `<div class="task-item ${t.done ? 'task-done' : ''}">
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskDone(${person.id}, ${t.id})">
+                        <span>${highlightText(t.title, query)}</span> ${t.dueDate ? `(শেষ তারিখ: ${t.dueDate})` : ''}
+                        <button class="icon-btn" style="float:right;" onclick="deleteTask(${person.id}, ${t.id})">🗑️</button>
+                    </div>`;
+                });
+                tasksHtml += `</div>`;
+            }
+            // কল লগ
+            let callHtml = '';
+            if (person.callLogs && person.callLogs.length) {
+                callHtml = `<div class="call-logs-section"><strong>📞 কল লগ:</strong>`;
+                person.callLogs.slice(-3).forEach(c => {
+                    callHtml += `<div class="call-item ${c.followup ? 'followup-required' : ''}">
+                        📅 ${c.date} - ${c.note} ${c.followup ? '⚠️ ফলোআপ দরকার' : ''}
+                    </div>`;
+                });
+                callHtml += `</div>`;
+            }
             card.innerHTML = `
                 <div class="card-header">
-                    <div class="person-name">${nameHtml || 'নাম নেই'}</div>
+                    <div class="person-name">${nameHtml}</div>
                     <div class="person-phone">📞 ${phoneHtml}</div>
                 </div>
                 <div class="detail-row">
                     ${person.area ? `<span class="detail-badge">📍 ${areaHtml}</span>` : ''}
                     ${person.role ? `<span class="detail-badge">👤 ${roleHtml}</span>` : ''}
                     ${person.cluster ? `<span class="detail-badge">🔘 ${clusterHtml}</span>` : ''}
+                    ${person.needFollowup ? `<span class="detail-badge" style="background:#fee2e2;">⚠️ ফলোআপ দরকার</span>` : ''}
                 </div>
-                ${person.note ? `<div class="note-text">📝 ${noteHtml}</div>` : ''}
+                ${tasksHtml}
+                ${callHtml}
                 <div class="card-actions">
-                    <button class="icon-btn edit-person" data-id="${person.id}" title="এডিট">✏️</button>
-                    <button class="icon-btn delete-person" data-id="${person.id}" title="ডিলিট">🗑️</button>
-                    <button class="icon-btn call-person" data-phone="${person.phone}" title="কল">📞</button>
-                    <button class="icon-btn wa-person" data-phone="${person.phone}" title="হোয়াটসঅ্যাপ">💬</button>
+                    <button class="icon-btn" onclick="quickAddTask(${person.id})">➕ টাস্ক</button>
+                    <button class="icon-btn" onclick="quickCallLog(${person.id})">📞 কল লগ</button>
+                    <button class="icon-btn edit-person" data-id="${person.id}">✏️ এডিট</button>
+                    <button class="icon-btn delete-person" data-id="${person.id}">🗑️ ডিলিট</button>
                 </div>
             `;
             grid.appendChild(card);
         });
+        attachCardEvents();
+    }
+
+    function renderList() {
+        const filtered = getFilteredData();
+        const tbody = document.getElementById('listTableBody');
+        tbody.innerHTML = '';
+        const query = document.getElementById('searchBox').value.trim();
+        filtered.forEach(p => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerHTML = highlightText(p.name, query);
+            row.insertCell(1).innerHTML = highlightText(p.phone, query);
+            row.insertCell(2).innerHTML = highlightText(p.area || '', query);
+            row.insertCell(3).innerHTML = highlightText(p.role || '', query);
+            const taskCount = p.tasks ? p.tasks.filter(t => !t.done).length : 0;
+            row.insertCell(4).innerHTML = `${taskCount}টি বাকি`;
+            row.insertCell(5).innerHTML = p.needFollowup ? 'হ্যাঁ' : 'না';
+            const actionCell = row.insertCell(6);
+            actionCell.innerHTML = `<button class="icon-btn" onclick="quickEdit(${p.id})">✏️</button> <button class="icon-btn" onclick="quickDelete(${p.id})">🗑️</button>`;
+        });
+    }
+
+    function attachCardEvents() {
         document.querySelectorAll('.edit-person').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
                 const id = parseInt(btn.dataset.id);
                 const person = peopleData.find(p => p.id === id);
                 if (person) loadPersonToForm(person);
             });
         });
         document.querySelectorAll('.delete-person').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
                 const id = parseInt(btn.dataset.id);
                 deletePersonWithPassword(id);
             });
         });
-        document.querySelectorAll('.call-person').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const phone = cleanIndianPhone(btn.dataset.phone);
-                if (phone) window.location.href = `tel:+91${phone}`;
-            });
-        });
-        document.querySelectorAll('.wa-person').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const phone = cleanIndianPhone(btn.dataset.phone);
-                if (phone) window.open(`https://wa.me/91${phone}`, '_blank');
-            });
-        });
-        document.getElementById('filteredCount').innerText = filtered.length;
-        document.getElementById('totalCount').innerText = peopleData.length;
     }
 
-    function updateStatsAndRender() {
-        rebuildFuse();
-        populateFilters();
-        renderGrid();
+    // গ্লোবাল ফাংশন (HTML থেকে কল করা হবে)
+    window.quickAddTask = (personId) => {
+        const title = prompt("টাস্কের বিবরণ লিখুন:");
+        if (title) addTask(personId, title);
+    };
+    window.quickCallLog = (personId) => {
+        const note = prompt("কলের নোট (কী কথা হলো?):");
+        if (note) {
+            const needFollowup = confirm("ফলোআপ প্রয়োজন?");
+            addCallLog(personId, note, needFollowup);
+        }
+    };
+    window.toggleTaskDone = toggleTaskDone;
+    window.deleteTask = deleteTask;
+    window.quickEdit = (id) => {
+        const person = peopleData.find(p => p.id === id);
+        if (person) loadPersonToForm(person);
+    };
+    window.quickDelete = (id) => deletePersonWithPassword(id);
+
+    function deletePersonWithPassword(id) {
+        const pwd = prompt("ডিলিট করতে পাসওয়ার্ড দিন:");
+        if (pwd !== ADMIN_PASSWORD) { alert("ভুল পাসওয়ার্ড"); return; }
+        if (confirm("নিশ্চিত ডিলিট?")) {
+            peopleData = peopleData.filter(p => p.id !== id);
+            saveToStorage();
+            if (document.getElementById('editId').value == id) resetFormToAddMode();
+            alert("ডিলিট হয়েছে");
+        }
+    }
+    function resetDataWithPassword() {
+        const pwd = prompt("রিসেট করতে পাসওয়ার্ড দিন:");
+        if (pwd !== ADMIN_PASSWORD) { alert("ভুল"); return; }
+        if (confirm("সব ডেটা মুছে ডিফল্ট লোড হবে?")) {
+            loadDefaultData();
+            saveToStorage();
+            resetFormToAddMode();
+            toggleForm(false);
+        }
     }
 
-    function populateFilters() {
-        const roles = [...new Set(peopleData.map(p => p.role).filter(r => r && r.trim()))];
-        const areas = [...new Set(peopleData.map(p => p.area).filter(a => a && a.trim()))];
-        const clusters = [...new Set(peopleData.map(p => p.cluster).filter(c => c && c.trim()))];
-        const roleSel = document.getElementById('filterRole');
-        const areaSel = document.getElementById('filterArea');
-        const clusterSel = document.getElementById('filterCluster');
-        roleSel.innerHTML = '<option value="">সব রোল</option>';
-        areaSel.innerHTML = '<option value="">সব এলাকা</option>';
-        clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
-        roles.forEach(r => { let opt = document.createElement('option'); opt.value = r; opt.text = r; roleSel.appendChild(opt); });
-        areas.forEach(a => { let opt = document.createElement('option'); opt.value = a; opt.text = a; areaSel.appendChild(opt); });
-        clusters.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; clusterSel.appendChild(opt); });
-    }
-
-    // ফর্ম কন্ট্রোল
+    // ফর্ম
     function toggleForm(show) {
         const fc = document.getElementById('formCard');
         if (show === true) fc.classList.add('show');
-        else if (show === false) fc.classList.remove('show');
-        else fc.classList.toggle('show');
+        else fc.classList.remove('show');
     }
     function resetFormToAddMode() {
         document.getElementById('peopleForm').reset();
         document.getElementById('editId').value = '';
-        document.getElementById('formTitle').innerHTML = '➕ নতুন সদস্য যোগ করুন';
+        document.getElementById('formTitle').innerHTML = '➕ নতুন সদস্য';
         document.getElementById('submitBtn').innerHTML = '➕ যোগ করুন';
         document.getElementById('cancelEditBtn').style.display = 'none';
         document.getElementById('phoneHint').innerHTML = '';
@@ -514,46 +656,19 @@
         document.getElementById('cluster').value = p.cluster || '';
         document.getElementById('note').value = p.note || '';
         document.getElementById('editId').value = p.id;
-        document.getElementById('formTitle').innerHTML = '✏️ সদস্য এডিট করুন';
-        document.getElementById('submitBtn').innerHTML = '💾 আপডেট করুন';
+        document.getElementById('formTitle').innerHTML = '✏️ সদস্য এডিট';
+        document.getElementById('submitBtn').innerHTML = '💾 আপডেট';
         document.getElementById('cancelEditBtn').style.display = 'inline-block';
         toggleForm(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0 });
     }
-
-    // পাসওয়ার্ড সুরক্ষা
-    function verifyPassword(action) {
-        const pwd = prompt(`🔐 ${action} করতে পাসওয়ার্ড দিন:`);
-        return pwd === ADMIN_PASSWORD;
-    }
-    function deletePersonWithPassword(id) {
-        if (!verifyPassword("ডিলিট")) { alert("ভুল পাসওয়ার্ড!"); return; }
-        if (confirm('নিশ্চিত ডিলিট?')) {
-            peopleData = peopleData.filter(p => p.id !== id);
-            saveToStorage();
-            if (document.getElementById('editId').value == id) resetFormToAddMode();
-            alert("✅ ডিলিট হয়েছে।");
-        }
-    }
-    function resetDataWithPassword() {
-        if (!verifyPassword("ডেটা রিসেট")) { alert("ভুল পাসওয়ার্ড!"); return; }
-        if (confirm('সব ডেটা ডিফল্ট উদাহরণ দিয়ে রিসেট হবে। নিশ্চিত?')) {
-            loadDefaultData();
-            saveToStorage();
-            resetFormToAddMode();
-            toggleForm(false);
-            alert("ডেটা ডিফল্টে রিসেট করা হয়েছে।");
-        }
-    }
-
-    // সেভ (যোগ/এডিট)
     function savePerson(e) {
         e.preventDefault();
         const name = document.getElementById('name').value.trim();
         let rawPhone = document.getElementById('phone').value.trim();
         if (!name) return alert('নাম দিন');
         if (!rawPhone) return alert('ফোন দিন');
-        if (!isValidIndianPhone(rawPhone)) return alert('ভারতীয় মোবাইল নম্বর দিন (10 ডিজিট, 6/7/8/9 দিয়ে শুরু)');
+        if (!isValidIndianPhone(rawPhone)) return alert('ভারতীয় মোবাইল দিন');
         const editId = document.getElementById('editId').value;
         const cleanedPhone = cleanIndianPhone(rawPhone);
         let isEditingSamePhone = false;
@@ -561,19 +676,19 @@
             const curr = peopleData.find(p => p.id == editId);
             if (curr && cleanIndianPhone(curr.phone) === cleanedPhone) isEditingSamePhone = true;
         }
-        if (!isEditingSamePhone && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) {
-            return alert('এই ফোন নম্বরটি আগে থেকেই আছে!');
-        }
+        if (!isEditingSamePhone && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) return alert('এই ফোন আগে থেকেই আছে!');
         const area = document.getElementById('area').value.trim();
         const role = document.getElementById('role').value.trim();
         const cluster = document.getElementById('cluster').value.trim();
         const note = document.getElementById('note').value.trim();
         if (!editId) {
             const newId = peopleData.length ? Math.max(...peopleData.map(p => p.id)) + 1 : 1;
-            peopleData.push({ id: newId, name, phone: cleanedPhone, area, role, cluster, note });
+            peopleData.push({ id: newId, name, phone: cleanedPhone, area, role, cluster, note, tasks: [], callLogs: [], needFollowup: false });
         } else {
             const idx = peopleData.findIndex(p => p.id == editId);
-            if (idx !== -1) peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
+            if (idx !== -1) {
+                peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
+            }
             resetFormToAddMode();
         }
         saveToStorage();
@@ -581,47 +696,32 @@
         toggleForm(false);
     }
 
-    // CSV এক্সপোর্ট (শীট আকারে)
+    // এক্সপোর্ট/ইমপোর্ট (CSV)
     function exportToCSV() {
-        if (!peopleData.length) {
-            alert("কোনো ডেটা নেই!");
-            return;
-        }
-        // হেডার
-        const headers = ["ID", "নাম", "ফোন", "এলাকা", "রোল", "ক্লাস্টার", "নোট"];
+        if (!peopleData.length) return alert("কোন ডেটা নেই");
+        const headers = ["ID","নাম","ফোন","এলাকা","রোল","ক্লাস্টার","নোট","টাস্ক","কল লগ","ফলোআপ প্রয়োজন"];
         const rows = peopleData.map(p => [
-            p.id,
-            `"${(p.name || '').replace(/"/g, '""')}"`,
-            p.phone || '',
-            `"${(p.area || '').replace(/"/g, '""')}"`,
-            `"${(p.role || '').replace(/"/g, '""')}"`,
-            `"${(p.cluster || '').replace(/"/g, '""')}"`,
-            `"${(p.note || '').replace(/"/g, '""')}"`
+            p.id, `"${p.name}"`, p.phone, `"${p.area||''}"`, `"${p.role||''}"`, `"${p.cluster||''}"`, `"${p.note||''}"`,
+            `"${(p.tasks||[]).map(t=>t.title+(t.done?'(done)':'')).join('; ')}"`,
+            `"${(p.callLogs||[]).map(c=>c.date+':'+c.note).join('; ')}"`,
+            p.needFollowup ? "হ্যাঁ" : "না"
         ]);
-        const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
-        const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute("download", `people_${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        alert("✅ CSV ফাইল ডাউনলোড হয়েছে। গুগল শীট বা এক্সেলে খুলুন।");
+        const csv = [headers, ...rows].map(row=>row.join(",")).join("\n");
+        const blob = new Blob(["\uFEFF"+csv], {type:"text/csv"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `crm_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
     }
-
-    // JSON এক্সপোর্ট/ইমপোর্ট
     function exportToJSON() {
         const dataStr = JSON.stringify(peopleData, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+        const blob = new Blob([dataStr], {type:'application/json'});
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `people_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.href = URL.createObjectURL(blob);
+        a.download = `crm_backup_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
-        URL.revokeObjectURL(url);
-        alert("✅ JSON ফাইল ডাউনলোড হয়েছে।");
+        URL.revokeObjectURL(a.href);
     }
     function importFromJSON(file) {
         const reader = new FileReader();
@@ -629,55 +729,83 @@
             try {
                 const imported = JSON.parse(ev.target.result);
                 if (Array.isArray(imported)) {
-                    peopleData = imported.map((p, idx) => ({ ...p, id: p.id || idx + 1 }));
+                    peopleData = imported.map((p,idx) => ({ ...p, id: p.id || idx+1, tasks: p.tasks || [], callLogs: p.callLogs || [] }));
                     saveToStorage();
-                    alert('✅ ইমপোর্ট সফল!');
+                    alert("ইমপোর্ট সফল");
                 } else throw new Error();
-            } catch (e) {
-                alert('ভুল JSON ফাইল');
-            }
+            } catch(e) { alert("ভুল JSON ফাইল"); }
         };
         reader.readAsText(file);
     }
-
-    // ডিফল্ট ডেটা
     function loadDefaultData() {
         peopleData = [
-            { id: 1, name: "রাহুল শর্মা", phone: "9876543210", area: "দিল্লি", role: "সদস্য", cluster: "উত্তর", note: "সক্রিয় কর্মী" },
-            { id: 2, name: "প্রিয়া সিং", phone: "9988776655", area: "মুম্বই", role: "নেত্রী", cluster: "পশ্চিম", note: "নতুন যোগদান" },
-            { id: 3, name: "অমিত কুমার", phone: "9000000000", area: "পাটনা", role: "ভলান্টিয়ার", cluster: "পূর্ব", note: "বিশেষ দক্ষতা" }
+            { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়", tasks:[], callLogs:[], needFollowup:false },
+            { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন", tasks:[{id:101, title:"রিপোর্ট জমা দিন", done:false, dueDate:"2026-04-15"}], callLogs:[{date:"2026-04-10", note:"ফোনে কথা হলো", followup:true}], needFollowup:true }
         ];
-        saveToStorage();
+    }
+
+    function populateFilters() {
+        const roles = [...new Set(peopleData.map(p=>p.role).filter(r=>r))];
+        const areas = [...new Set(peopleData.map(p=>p.area).filter(a=>a))];
+        const clusters = [...new Set(peopleData.map(p=>p.cluster).filter(c=>c))];
+        const roleSel = document.getElementById('filterRole');
+        const areaSel = document.getElementById('filterArea');
+        const clusterSel = document.getElementById('filterCluster');
+        roleSel.innerHTML = '<option value="">সব রোল</option>';
+        areaSel.innerHTML = '<option value="">সব এলাকা</option>';
+        clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
+        roles.forEach(r=>{let opt=document.createElement('option'); opt.value=r; opt.text=r; roleSel.appendChild(opt);});
+        areas.forEach(a=>{let opt=document.createElement('option'); opt.value=a; opt.text=a; areaSel.appendChild(opt);});
+        clusters.forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.text=c; clusterSel.appendChild(opt);});
+    }
+
+    function updateStatsAndRender() {
+        rebuildFuse();
+        populateFilters();
+        render();
     }
 
     function initData() {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) peopleData = JSON.parse(stored);
         else loadDefaultData();
-        peopleData.sort((a, b) => a.id - b.id);
-        rebuildFuse();
-        populateFilters();
-        renderGrid();
-        document.getElementById('totalCount').innerText = peopleData.length;
+        peopleData.forEach(p => { if (!p.tasks) p.tasks = []; if (!p.callLogs) p.callLogs = []; });
+        updateStatsAndRender();
     }
 
-    // ইভেন্ট লিসেনার
-    document.getElementById('toggleFormBtn').addEventListener('click', () => toggleForm());
+    // ভিউ টগল
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentView = btn.dataset.view;
+            if (currentView === 'grid') {
+                document.getElementById('gridView').classList.remove('hide');
+                document.getElementById('listView').classList.remove('active');
+                document.getElementById('gridView').style.display = 'block';
+                document.getElementById('listView').style.display = 'none';
+            } else {
+                document.getElementById('gridView').style.display = 'none';
+                document.getElementById('listView').style.display = 'block';
+                document.getElementById('listView').classList.add('active');
+            }
+            render();
+        });
+    });
+
+    document.getElementById('toggleFormBtn').addEventListener('click', () => toggleForm(true));
     document.getElementById('peopleForm').addEventListener('submit', savePerson);
     document.getElementById('cancelEditBtn').addEventListener('click', () => { resetFormToAddMode(); toggleForm(false); });
-    document.getElementById('searchBox').addEventListener('input', () => renderGrid());
-    document.getElementById('filterRole').addEventListener('change', () => renderGrid());
-    document.getElementById('filterArea').addEventListener('change', () => renderGrid());
-    document.getElementById('filterCluster').addEventListener('change', () => renderGrid());
-    document.getElementById('exportBtn').addEventListener('click', exportToJSON);
+    document.getElementById('searchBox').addEventListener('input', () => render());
+    document.getElementById('filterRole').addEventListener('change', () => render());
+    document.getElementById('filterArea').addEventListener('change', () => render());
+    document.getElementById('filterCluster').addEventListener('change', () => render());
+    document.getElementById('filterFollowup').addEventListener('change', () => render());
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
-    document.getElementById('importFile').addEventListener('change', (e) => {
-        if (e.target.files.length) importFromJSON(e.target.files[0]);
-        e.target.value = '';
-    });
+    document.getElementById('exportBtn').addEventListener('click', exportToJSON);
+    document.getElementById('importFile').addEventListener('change', (e) => { if(e.target.files.length) importFromJSON(e.target.files[0]); e.target.value=''; });
     document.getElementById('resetDataBtn').addEventListener('click', resetDataWithPassword);
     document.getElementById('phone').addEventListener('input', validatePhoneField);
-
     initData();
 </script>
 </body>
