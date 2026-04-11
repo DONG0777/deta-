@@ -3,407 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>প্রো টুলস | CRM + JSON এডিটর</title>
+    <title>প্রো পিপল ম্যানেজার</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
-        :root {
-            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
-            --card-bg: rgba(255,255,255,0.96);
-            --text-primary: #1a2c3e;
-            --border-light: #e2edf7;
-            --badge-bg: #f1f5f9;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        body.dark {
-            --bg-gradient: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-            --card-bg: #1e293b;
-            --text-primary: #f1f5f9;
-            --border-light: #334155;
-            --badge-bg: #334155;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg-gradient);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
             padding: 20px 16px 40px;
-            color: var(--text-primary);
-            transition: background 0.3s;
+            color: #1a2c3e;
         }
-        .container { max-width: 1300px; margin: 0 auto; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab-btn { background: var(--card-bg); border: none; padding: 12px 24px; border-radius: 60px; font-weight: 700; cursor: pointer; font-size: 1rem; }
-        .tab-btn.active { background: #2563eb; color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .card { background: var(--card-bg); border-radius: 32px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15); }
-        .form-card { display: none; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; margin-bottom: 1rem; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        label { font-weight: 700; font-size: 0.75rem; color: var(--text-primary); opacity: 0.8; }
-        input, select, textarea { padding: 12px 16px; border: 1.5px solid var(--border-light); border-radius: 28px; background: var(--card-bg); color: var(--text-primary); }
-        .btn { padding: 10px 18px; border-radius: 40px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(255,255,255,0.96);
+            border-radius: 32px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15);
+        }
+        .form-card {
+            display: none;
+        }
+        .form-card.show {
+            display: block;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        label {
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #2c4c6e;
+        }
+        input, select, textarea {
+            padding: 12px 16px;
+            border: 1.5px solid #e2edf7;
+            border-radius: 28px;
+            font-size: 0.95rem;
+            background: white;
+        }
+        .btn {
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
         .btn-primary { background: #2563eb; color: white; }
         .btn-success { background: #10b981; color: white; }
         .btn-danger { background: #ef4444; color: white; }
         .btn-warning { background: #f59e0b; color: white; }
-        .btn-outline { background: transparent; border: 1.5px solid var(--border-light); }
+        .btn-outline { background: transparent; border: 1.5px solid #cbd5e6; }
         .btn-new { width: 100%; background: #1e2f3f; color: white; padding: 14px; margin-bottom: 8px; }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 16px; }
-        .search-box { width: 100%; padding: 12px 20px; border-radius: 60px; border: 1.5px solid var(--border-light); background: var(--card-bg); margin-bottom: 1rem; }
-        .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; }
-        .view-toggle { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 1rem; }
-        .view-btn { background: var(--badge-bg); border: none; padding: 6px 16px; border-radius: 40px; cursor: pointer; }
-        .view-btn.active { background: #2563eb; color: white; }
-        .people-grid { display: flex; flex-direction: column; gap: 16px; }
-        .person-card { background: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-light); }
-        .card-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; cursor: pointer; }
-        .person-name { font-size: 1.3rem; font-weight: 800; }
-        .person-phone { font-size: 0.85rem; background: var(--badge-bg); padding: 4px 12px; border-radius: 40px; }
-        .detail-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
-        .detail-badge { background: var(--badge-bg); padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; }
-        .call-logs-section { margin-top: 12px; background: var(--badge-bg); border-radius: 20px; padding: 10px; }
-        .call-item { background: var(--card-bg); border-radius: 20px; padding: 8px 12px; margin-bottom: 8px; border-left: 4px solid #3b82f6; font-size: 0.8rem; }
-        .call-outcome-ready { border-left-color: #10b981; }
-        .call-outcome-denied { border-left-color: #ef4444; }
-        .call-outcome-reject { border-left-color: #f59e0b; }
-        .call-outcome-followup { border-left-color: #a855f7; }
-        .followup-badge { background: #fee2e2; color: #991b1b; }
-        .card-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px; }
-        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 4px 10px; border-radius: 40px; }
-        .list-view { overflow-x: auto; display: none; }
-        .list-view.active { display: block; }
-        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 24px; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid var(--border-light); }
-        .stats-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .stat-card { background: var(--card-bg); border-radius: 28px; padding: 10px 16px; flex: 1; text-align: center; }
-        .stat-number { font-size: 1.8rem; font-weight: 800; color: #2563eb; }
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: var(--card-bg); border-radius: 32px; padding: 24px; width: 90%; max-width: 400px; }
-        .json-editor-area { background: var(--card-bg); border-radius: 24px; padding: 1rem; }
-        .json-tree { font-family: monospace; font-size: 0.85rem; overflow-x: auto; }
-        .json-item { margin-left: 20px; }
-        .json-key { font-weight: bold; color: #2563eb; cursor: pointer; }
-        .json-value { color: #10b981; }
-        .edit-json-btn, .delete-json-btn { background: none; border: none; cursor: pointer; margin-left: 8px; font-size: 0.8rem; }
-        .toast { position: fixed; bottom: 20px; left: 20px; background: #1e293b; color: white; padding: 12px 20px; border-radius: 40px; animation: fadeOut 3s forwards; z-index: 1001; }
-        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
-        @media (max-width: 680px) { .stats-row { flex-direction: column; } }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; justify-content: center; }
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 60px;
+            border: 1.5px solid #e2edf7;
+            margin-bottom: 1rem;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .filters select {
+            flex: 1;
+            min-width: 110px;
+            padding: 10px;
+            border-radius: 40px;
+        }
+        .view-toggle {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+        .view-btn {
+            background: #eef2f8;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .view-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+        .people-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .person-card {
+            background: white;
+            border-radius: 28px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid #eef2f8;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .person-name {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #0f2b3d;
+        }
+        .person-phone {
+            font-size: 0.85rem;
+            background: #eef2ff;
+            padding: 4px 12px;
+            border-radius: 40px;
+        }
+        .detail-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .detail-badge {
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+        .note-text {
+            background: #fefce8;
+            padding: 8px 12px;
+            border-radius: 20px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #5b4e1e;
+        }
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 12px;
+            border-top: 1px solid #eef2f8;
+            padding-top: 12px;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 40px;
+            transition: 0.1s;
+        }
+        .icon-btn:hover {
+            background: #f1f5f9;
+        }
+        .kebab-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .kebab-menu {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 100;
+            min-width: 120px;
+            overflow: hidden;
+        }
+        .kebab-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .kebab-menu button:hover {
+            background: #f1f5f9;
+        }
+        .list-view {
+            overflow-x: auto;
+            display: none;
+        }
+        .list-view.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 24px;
+        }
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #eef2f8;
+            font-size: 0.85rem;
+        }
+        th {
+            background: #f8fafc;
+        }
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 28px;
+            padding: 10px 16px;
+            flex: 1;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #2563eb;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #1e293b;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 40px;
+            animation: fadeOut 3s forwards;
+            z-index: 1000;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        @media (max-width: 550px) {
+            body { padding: 12px; }
+            .card { padding: 1rem; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="crm">👥 CRM (পিপল ম্যানেজার)</button>
-        <button class="tab-btn" data-tab="json">📂 JSON ভিউয়ার & এডিটর</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>👥 প্রো পিপল ম্যানেজার</h1>
+        <div style="background: #fef9c3; padding: 4px 12px; border-radius: 40px; font-size: 0.7rem;">🔐 পাসওয়ার্ড: admin123</div>
     </div>
 
-    <!-- ======================= CRM ট্যাব ======================= -->
-    <div id="crmTab" class="tab-content active">
-        <!-- প্রকল্প নির্বাচন বার -->
-        <div class="project-bar" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; background: var(--card-bg); padding: 12px 20px; border-radius: 60px;">
-            <span>📁 প্রকল্প: </span>
-            <select id="projectSelect" style="flex:1; padding: 8px; border-radius: 40px;"></select>
-            <button id="newProjectBtn" class="btn-sm btn-outline" style="padding: 6px 14px;">➕ নতুন</button>
-            <button id="renameProjectBtn" class="btn-sm btn-outline">✏️ নাম বদলাও</button>
-            <button id="deleteProjectBtn" class="btn-sm btn-danger">🗑️ ডিলিট</button>
-            <button id="exportProjectBtn" class="btn-sm btn-primary">📎 JSON এক্সপোর্ট</button>
-            <label for="importProjectInput" class="btn-sm btn-outline" style="cursor:pointer;">📂 JSON ইমপোর্ট</label>
-            <input type="file" id="importProjectInput" accept=".json" style="display:none;">
-        </div>
+    <button id="toggleFormBtn" class="btn btn-new">➕ নতুন সদস্য যোগ করুন</button>
 
-        <button id="toggleFormBtn" class="btn btn-new">➕ নতুন সদস্য যোগ করুন</button>
-
-        <div id="formCard" class="card form-card">
-            <h2 id="formTitle">➕ নতুন সদস্য</h2>
-            <form id="peopleForm">
-                <div class="form-grid">
-                    <div class="form-group"><label>নাম *</label><input type="text" id="name" required></div>
-                    <div class="form-group"><label>ফোন *</label><input type="tel" id="phone" required><span id="phoneHint"></span></div>
-                    <div class="form-group"><label>এলাকা</label><input type="text" id="area"></div>
-                    <div class="form-group"><label>রোল</label><input type="text" id="role"></div>
-                    <div class="form-group"><label>ক্লাস্টার</label><input type="text" id="cluster"></div>
-                    <div class="form-group"><label>নোট</label><textarea id="note" rows="2"></textarea></div>
-                </div>
-                <div class="btn-group"><button type="submit" class="btn btn-success" id="submitBtn">💾 সংরক্ষণ</button><button type="button" id="cancelEditBtn" class="btn btn-outline">বাতিল</button></div>
-                <input type="hidden" id="editId">
-            </form>
-        </div>
-
-        <div class="card">
-            <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, কল নোট...">
-            <div class="filters">
-                <select id="filterRole"><option value="">সব রোল</option></select>
-                <select id="filterArea"><option value="">সব এলাকা</option></select>
-                <select id="filterCluster"><option value="">সব ক্লাস্টার</option></select>
-                <select id="filterFollowup"><option value="">ফলোআপ প্রয়োজন</option><option value="yes">হ্যাঁ</option><option value="no">না</option></select>
+    <div id="formCard" class="card form-card">
+        <h2 id="formTitle" style="margin-bottom: 1rem;">➕ নতুন সদস্য</h2>
+        <form id="peopleForm">
+            <div class="form-grid">
+                <div class="form-group"><label>নাম *</label><input type="text" id="name" required></div>
+                <div class="form-group"><label>ফোন *</label><input type="tel" id="phone" required><span id="phoneHint" style="font-size:0.7rem;"></span></div>
+                <div class="form-group"><label>এলাকা</label><input type="text" id="area"></div>
+                <div class="form-group"><label>রোল</label><input type="text" id="role"></div>
+                <div class="form-group"><label>ক্লাস্টার</label><input type="text" id="cluster"></div>
+                <div class="form-group"><label>নোট</label><textarea id="note" rows="2"></textarea></div>
             </div>
-            <div class="view-toggle">
-                <button class="view-btn active" data-view="grid">📱 কার্ড ভিউ</button>
-                <button class="view-btn" data-view="list">📋 লিস্ট ভিউ</button>
-            </div>
-            <div class="stats-row">
-                <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>মোট সদস্য</div></div>
-                <div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>দেখানো হচ্ছে</div></div>
-                <div class="stat-card"><div class="stat-number" id="followupCount">0</div><div>ফলোআপ প্রয়োজন</div></div>
-            </div>
-
-            <div id="gridView" class="people-grid"></div>
-            <div id="listView" class="list-view"><table><thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>শেষ কলের ফল</th><th>ফলোআপ</th><th>অ্যাকশন</th></tr></thead><tbody id="listTableBody"></tbody></table></div>
-
-            <div class="btn-group">
-                <button id="exportCsvBtn" class="btn btn-primary">📎 CSV (শীট)</button>
-                <button id="resetDataBtn" class="btn btn-danger">🔄 রিসেট (ডিফল্ট)</button>
-            </div>
-        </div>
+            <div class="btn-group"><button type="submit" class="btn btn-success" id="submitBtn">💾 সংরক্ষণ</button><button type="button" id="cancelEditBtn" class="btn btn-outline" style="display:none;">বাতিল</button></div>
+            <input type="hidden" id="editId">
+        </form>
     </div>
 
-    <!-- ======================= JSON ভিউয়ার ট্যাব ======================= -->
-    <div id="jsonTab" class="tab-content">
-        <div class="card">
-            <h3>📂 যেকোনো ফরম্যাটের JSON ফাইল আপলোড করুন</h3>
-            <div class="btn-group" style="justify-content: flex-start;">
-                <label for="jsonFileInput" class="btn btn-primary">📁 JSON ফাইল নির্বাচন করুন</label>
-                <input type="file" id="jsonFileInput" accept=".json" style="display:none;">
-                <button id="exportJsonBtn" class="btn btn-success">💾 JSON ডাউনলোড করুন</button>
-                <button id="resetJsonBtn" class="btn btn-outline">🔄 ফাঁকা শুরু</button>
-            </div>
-            <div id="jsonEditorArea" class="json-editor-area" style="margin-top:20px;">
-                <p>🔹 কোনো JSON ফাইল আপলোড করুন। অ্যারে বা অবজেক্ট যাই হোক, এডিট/ডিলিট করতে পারবেন।</p>
-                <div id="jsonTreeContainer" class="json-tree"></div>
-            </div>
+    <div class="card">
+        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, এলাকা, নোট...">
+        <div class="filters">
+            <select id="filterRole"><option value="">সব রোল</option></select>
+            <select id="filterArea"><option value="">সব এলাকা</option></select>
+            <select id="filterCluster"><option value="">সব ক্লাস্টার</option></select>
+        </div>
+        <div class="view-toggle">
+            <button class="view-btn active" data-view="grid">📱 কার্ড ভিউ</button>
+            <button class="view-btn" data-view="list">📋 লিস্ট ভিউ</button>
+        </div>
+        <div class="stats-row">
+            <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>মোট সদস্য</div></div>
+            <div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>দেখানো হচ্ছে</div></div>
+        </div>
+
+        <div id="gridView" class="people-grid"></div>
+        <div id="listView" class="list-view">
+            <table>
+                <thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>নোট</th><th></th></tr></thead>
+                <tbody id="listTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="btn-group">
+            <button id="exportCsvBtn" class="btn btn-primary">📎 CSV এক্সপোর্ট</button>
+            <button id="exportJsonBtn" class="btn btn-warning">📁 JSON ব্যাকআপ</button>
+            <label for="importFile" class="btn btn-outline" style="cursor:pointer;">📂 JSON ইমপোর্ট</label>
+            <input type="file" id="importFile" accept=".json" style="display:none;">
+            <button id="resetDataBtn" class="btn btn-danger">🔄 ডিফল্ট রিসেট</button>
         </div>
     </div>
 </div>
 
 <script>
-    // ======================= জেনেরিক JSON এডিটর =======================
-    let currentJsonData = null;
-    function showToast(msg) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerText = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-    function renderJsonTree(data, container = null) {
-        if (!container) container = document.getElementById('jsonTreeContainer');
-        container.innerHTML = '';
-        if (data === null || data === undefined) { container.innerText = 'null'; return; }
-        const type = typeof data;
-        if (type === 'string' || type === 'number' || type === 'boolean') {
-            container.innerText = JSON.stringify(data);
-            return;
-        }
-        if (Array.isArray(data)) {
-            const arrDiv = document.createElement('div');
-            arrDiv.className = 'json-item';
-            arrDiv.innerHTML = `<span class="json-key">📁 অ্যারে (${data.length} items)</span> <button class="edit-json-btn" onclick="addArrayItem()">➕ যোগ করুন</button>`;
-            const itemsDiv = document.createElement('div');
-            itemsDiv.style.marginLeft = '20px';
-            data.forEach((item, idx) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'json-item';
-                itemDiv.innerHTML = `<span class="json-key">[${idx}]</span> 
-                    <button class="edit-json-btn" onclick="editArrayItem(${idx})">✏️</button>
-                    <button class="delete-json-btn" onclick="deleteArrayItem(${idx})">🗑️</button>`;
-                const valDiv = document.createElement('div');
-                valDiv.style.marginLeft = '20px';
-                renderJsonTree(item, valDiv);
-                itemDiv.appendChild(valDiv);
-                itemsDiv.appendChild(itemDiv);
-            });
-            arrDiv.appendChild(itemsDiv);
-            container.appendChild(arrDiv);
-            return;
-        }
-        if (type === 'object') {
-            const objDiv = document.createElement('div');
-            objDiv.className = 'json-item';
-            objDiv.innerHTML = `<span class="json-key">🔑 অবজেক্ট</span> <button class="edit-json-btn" onclick="addObjectKey()">➕ কী যোগ করুন</button>`;
-            const propsDiv = document.createElement('div');
-            propsDiv.style.marginLeft = '20px';
-            for (let key in data) {
-                const propDiv = document.createElement('div');
-                propDiv.className = 'json-item';
-                propDiv.innerHTML = `<span class="json-key">${key}:</span> 
-                    <button class="edit-json-btn" onclick="editObjectKey('${key}')">✏️</button>
-                    <button class="delete-json-btn" onclick="deleteObjectKey('${key}')">🗑️</button>`;
-                const valDiv = document.createElement('div');
-                valDiv.style.marginLeft = '20px';
-                renderJsonTree(data[key], valDiv);
-                propDiv.appendChild(valDiv);
-                propsDiv.appendChild(propDiv);
-            }
-            objDiv.appendChild(propsDiv);
-            container.appendChild(objDiv);
-            return;
-        }
-        container.innerText = JSON.stringify(data);
-    }
-    window.addArrayItem = function() {
-        if (!Array.isArray(currentJsonData)) { showToast("শুধু অ্যারে টাইপ ডাটাতে আইটেম যোগ করা যাবে"); return; }
-        const newValue = prompt("নতুন আইটেমের মান JSON আকারে লিখুন (যেমন: 'text' বা {\"key\":\"value\"}):");
-        if (newValue !== null) {
-            try { currentJsonData.push(JSON.parse(newValue)); } catch(e) { currentJsonData.push(newValue); }
-            renderJsonTree(currentJsonData);
-            showToast("আইটেম যোগ হয়েছে");
-        }
-    };
-    window.editArrayItem = function(index) {
-        if (!Array.isArray(currentJsonData)) return;
-        const oldVal = currentJsonData[index];
-        const newVal = prompt(`ইনডেক্স ${index} এর মান পরিবর্তন করুন:`, JSON.stringify(oldVal));
-        if (newVal !== null) {
-            try { currentJsonData[index] = JSON.parse(newVal); } catch(e) { currentJsonData[index] = newVal; }
-            renderJsonTree(currentJsonData);
-            showToast("আপডেট হয়েছে");
-        }
-    };
-    window.deleteArrayItem = function(index) {
-        if (confirm(`ইনডেক্স ${index} মুছবেন?`)) { currentJsonData.splice(index, 1); renderJsonTree(currentJsonData); showToast("মুছে ফেলা হয়েছে"); }
-    };
-    window.addObjectKey = function() {
-        if (typeof currentJsonData !== 'object' || Array.isArray(currentJsonData)) { showToast("অবজেক্ট টাইপ ডাটাতে কী যোগ করা যাবে"); return; }
-        const key = prompt("নতুন কী এর নাম দিন:");
-        if (key) {
-            const value = prompt("কী এর মান JSON আকারে দিন:", "null");
-            try { currentJsonData[key] = JSON.parse(value); } catch(e) { currentJsonData[key] = value; }
-            renderJsonTree(currentJsonData);
-            showToast(`কী "${key}" যোগ হয়েছে`);
-        }
-    };
-    window.editObjectKey = function(key) {
-        const oldVal = currentJsonData[key];
-        const newVal = prompt(`"${key}" এর মান পরিবর্তন করুন:`, JSON.stringify(oldVal));
-        if (newVal !== null) {
-            try { currentJsonData[key] = JSON.parse(newVal); } catch(e) { currentJsonData[key] = newVal; }
-            renderJsonTree(currentJsonData);
-            showToast("আপডেট হয়েছে");
-        }
-    };
-    window.deleteObjectKey = function(key) {
-        if (confirm(`"${key}" কী মুছবেন?`)) { delete currentJsonData[key]; renderJsonTree(currentJsonData); showToast("মুছে ফেলা হয়েছে"); }
-    };
-    function loadJsonFromFile(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try { currentJsonData = JSON.parse(e.target.result); renderJsonTree(currentJsonData); showToast("JSON ফাইল লোড হয়েছে"); }
-            catch(err) { alert("JSON ফরম্যাট সঠিক নয়: " + err.message); }
-        };
-        reader.readAsText(file);
-    }
-    function exportJson() {
-        if (currentJsonData === null) { alert("কোনো JSON ডাটা নেই"); return; }
-        const dataStr = JSON.stringify(currentJsonData, null, 2);
-        const blob = new Blob([dataStr], {type: 'application/json'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `json_editor_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href);
-        showToast("JSON ডাউনলোড হয়েছে");
-    }
-    function resetJson() { if (confirm("বর্তমান JSON ডাটা মুছে নতুন শুরু করবেন?")) { currentJsonData = null; document.getElementById('jsonTreeContainer').innerHTML = '<p>🔹 কোনো JSON ফাইল আপলোড করুন।</p>'; showToast("ফাঁকা অবস্থায় রিসেট হয়েছে"); } }
-
-    // ======================= CRM প্রজেক্ট ম্যানেজমেন্ট =======================
     const ADMIN_PASSWORD = "admin123";
-    const STORAGE_PROJECTS_KEY = "crm_projects_final";
-    let projects = {};
-    let currentProjectId = null;
+    const STORAGE_KEY = "peopleManagerFinal";
+
     let peopleData = [];
     let fuseInstance = null;
     let currentView = 'grid';
-
-    function loadProjects() {
-        const stored = localStorage.getItem(STORAGE_PROJECTS_KEY);
-        if (stored) { projects = JSON.parse(stored); }
-        else {
-            const defaultData = [
-                { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়", tasks:[], callLogs:[], needFollowup:false },
-                { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন", tasks:[], callLogs:[{id:101, date:"2026-04-10", outcome:"Followup", note:"ফোন ধরেনি"}], needFollowup:true }
-            ];
-            projects = { "proj_default": { name: "নাগরাকাটা বিধানসভা", data: defaultData } };
-            saveProjects();
-        }
-        currentProjectId = localStorage.getItem("currentProjectId") || Object.keys(projects)[0];
-        if (!projects[currentProjectId]) currentProjectId = Object.keys(projects)[0];
-        refreshProjectSelect();
-        loadCurrentProjectData();
-    }
-    function saveProjects() { localStorage.setItem(STORAGE_PROJECTS_KEY, JSON.stringify(projects)); }
-    function refreshProjectSelect() {
-        const sel = document.getElementById('projectSelect');
-        sel.innerHTML = '';
-        for (let id in projects) {
-            let opt = document.createElement('option');
-            opt.value = id;
-            opt.textContent = projects[id].name;
-            if (id === currentProjectId) opt.selected = true;
-            sel.appendChild(opt);
-        }
-    }
-    function loadCurrentProjectData() {
-        if (!currentProjectId || !projects[currentProjectId]) return;
-        peopleData = projects[currentProjectId].data || [];
-        peopleData.forEach(p => { if (!p.tasks) p.tasks = []; if (!p.callLogs) p.callLogs = []; });
-        updateAll();
-    }
-    function saveCurrentProjectData() {
-        if (currentProjectId && projects[currentProjectId]) {
-            projects[currentProjectId].data = peopleData;
-            saveProjects();
-        }
-    }
-    function switchProject(projectId) {
-        if (!projects[projectId]) return;
-        currentProjectId = projectId;
-        localStorage.setItem("currentProjectId", currentProjectId);
-        loadCurrentProjectData();
-        refreshProjectSelect();
-    }
-    function createNewProject() {
-        let name = prompt("নতুন প্রকল্পের নাম:");
-        if (!name) return;
-        const id = "proj_" + Date.now();
-        projects[id] = { name: name, data: [] };
-        saveProjects();
-        switchProject(id);
-        showToast(`✅ প্রকল্প "${name}" তৈরি হয়েছে`);
-    }
-    function renameCurrentProject() {
-        let newName = prompt("নতুন নাম দিন:", projects[currentProjectId].name);
-        if (newName) { projects[currentProjectId].name = newName; saveProjects(); refreshProjectSelect(); showToast("নাম পরিবর্তন হয়েছে"); }
-    }
-    function deleteCurrentProject() {
-        if (Object.keys(projects).length === 1) { alert("শেষ প্রকল্প ডিলিট করা যাবে না। আগে অন্য প্রকল্প তৈরি করুন।"); return; }
-        if (confirm(`"${projects[currentProjectId].name}" প্রকল্প মুছবেন?`)) {
-            delete projects[currentProjectId];
-            saveProjects();
-            const newId = Object.keys(projects)[0];
-            switchProject(newId);
-            showToast("প্রকল্প ডিলিট হয়েছে");
-        }
-    }
-    function exportCurrentProject() {
-        const dataStr = JSON.stringify(peopleData, null, 2);
-        const blob = new Blob([dataStr], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `${projects[currentProjectId].name}_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        showToast("JSON ডাউনলোড হয়েছে");
-    }
-    function importToCurrentProject(file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-            try {
-                const imported = JSON.parse(ev.target.result);
-                if (Array.isArray(imported)) {
-                    peopleData = imported.map(p => ({ ...p, tasks: p.tasks||[], callLogs: p.callLogs||[] }));
-                    saveCurrentProjectData();
-                    updateAll();
-                    alert("ইমপোর্ট সফল");
-                } else throw new Error();
-            } catch(e) { alert("ভুল JSON ফাইল"); }
-        };
-        reader.readAsText(file);
-    }
 
     // ফোন ফাংশন
     function cleanIndianPhone(phone) {
@@ -413,93 +347,52 @@
         if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
         return cleaned.replace(/\D/g, '');
     }
-    function isValidIndianPhone(phone) { return /^[6-9]\d{9}$/.test(cleanIndianPhone(phone)); }
+    function isValidIndianPhone(phone) {
+        return /^[6-9]\d{9}$/.test(cleanIndianPhone(phone));
+    }
     function validatePhoneField() {
-        const inp = document.getElementById('phone'), hint = document.getElementById('phoneHint');
+        const inp = document.getElementById('phone');
+        const hint = document.getElementById('phoneHint');
         const raw = inp.value;
         if (!raw) { hint.innerHTML = ''; return false; }
         const valid = isValidIndianPhone(raw);
-        hint.innerHTML = valid ? '✓ বৈধ' : '✗ 10 ডিজিট, 6/7/8/9 দিয়ে শুরু';
+        hint.innerHTML = valid ? '✓ বৈধ ভারতীয় মোবাইল' : '✗ ১০ ডিজিট, 6/7/8/9 দিয়ে শুরু';
         hint.style.color = valid ? '#10b981' : '#ef4444';
         return valid;
     }
     function isDuplicatePhone(phone, excludeId = null) {
         const cleaned = cleanIndianPhone(phone);
-        return peopleData.some(p => (excludeId === null || p.id != excludeId) && cleanIndianPhone(p.phone) === cleaned);
+        return peopleData.some(p => {
+            if (excludeId !== null && p.id == excludeId) return false;
+            return cleanIndianPhone(p.phone) === cleaned;
+        });
     }
 
-    // কল লগ
-    function showCallLogModal(personId) {
-        const person = peopleData.find(p => p.id == personId);
-        if (!person) return;
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>📞 কলের ফলাফল ও নোট - ${person.name}</h3>
-                <select id="callOutcome" style="width:100%; margin:12px 0; padding:10px;">
-                    <option value="Ready">✅ Ready (আগ্রহী)</option>
-                    <option value="Denied">❌ Denied (অস্বীকৃত)</option>
-                    <option value="Reject">🚫 Reject (প্রত্যাখ্যান)</option>
-                    <option value="Followup">🔄 Follow-up Needed</option>
-                </select>
-                <textarea id="callNote" placeholder="কলের নোট লিখুন..." rows="3" style="width:100%; margin-bottom:12px;"></textarea>
-                <div class="btn-group"><button id="saveCallBtn" class="btn btn-success">সংরক্ষণ</button><button id="closeModalBtn" class="btn btn-outline">বাতিল</button></div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        document.getElementById('closeModalBtn').onclick = () => modal.remove();
-        document.getElementById('saveCallBtn').onclick = () => {
-            const outcome = document.getElementById('callOutcome').value;
-            const note = document.getElementById('callNote').value.trim() || "কোন নোট নেই";
-            addCallLog(personId, outcome, note);
-            modal.remove();
-            showToast(`📞 কল লগ: ${outcome}`);
-        };
-    }
-    function addCallLog(personId, outcome, note) {
-        const person = peopleData.find(p => p.id == personId);
-        if (!person) return;
-        if (!person.callLogs) person.callLogs = [];
-        person.callLogs.unshift({ id: Date.now(), date: new Date().toLocaleString(), outcome, note });
-        person.needFollowup = (outcome === 'Followup');
-        saveCurrentProjectData();
+    // স্টোরেজ
+    function saveToStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData));
         updateAll();
     }
-    // টাস্ক
-    function addTask(personId, title) {
-        const person = peopleData.find(p => p.id == personId);
-        if (!person) return;
-        if (!person.tasks) person.tasks = [];
-        person.tasks.push({ id: Date.now(), title, done: false });
-        saveCurrentProjectData();
-        updateAll();
-        showToast("✅ টাস্ক যোগ হয়েছে");
+    function rebuildFuse() {
+        fuseInstance = new Fuse(peopleData, {
+            keys: ['name', 'phone', 'area', 'role', 'cluster', 'note'],
+            threshold: 0.3,
+            includeMatches: true
+        });
     }
-    function toggleTaskDone(personId, taskId) {
-        const person = peopleData.find(p => p.id == personId);
-        const task = person?.tasks?.find(t => t.id == taskId);
-        if (task) { task.done = !task.done; saveCurrentProjectData(); updateAll(); }
-    }
-    function deleteTask(personId, taskId) {
-        const person = peopleData.find(p => p.id == personId);
-        if (person && person.tasks) person.tasks = person.tasks.filter(t => t.id != taskId);
-        saveCurrentProjectData();
-        updateAll();
-    }
-
-    // রেন্ডার
-    function rebuildFuse() { fuseInstance = new Fuse(peopleData, { keys: ['name','phone','area','role','cluster','note','callLogs.note'], threshold: 0.3 }); }
     function getFilteredData() {
         let filtered = peopleData;
         const q = document.getElementById('searchBox').value.trim();
-        if (q) filtered = fuseInstance.search(q).map(r => r.item);
-        const role = document.getElementById('filterRole').value, area = document.getElementById('filterArea').value, cluster = document.getElementById('filterCluster').value, followup = document.getElementById('filterFollowup').value;
+        if (q) {
+            const results = fuseInstance.search(q);
+            filtered = results.map(r => r.item);
+        }
+        const role = document.getElementById('filterRole').value;
+        const area = document.getElementById('filterArea').value;
+        const cluster = document.getElementById('filterCluster').value;
         if (role) filtered = filtered.filter(p => p.role === role);
         if (area) filtered = filtered.filter(p => p.area === area);
         if (cluster) filtered = filtered.filter(p => p.cluster === cluster);
-        if (followup === 'yes') filtered = filtered.filter(p => p.needFollowup);
-        if (followup === 'no') filtered = filtered.filter(p => !p.needFollowup);
         return filtered;
     }
     function highlightText(text, query) {
@@ -507,12 +400,17 @@
         const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return text.replace(regex, `<span style="background:#fef08a; color:#0f172a;">$1</span>`);
     }
-    function render() { currentView === 'grid' ? renderGrid() : renderList(); updateStats(); }
+
+    // রেন্ডার
+    function render() {
+        if (currentView === 'grid') renderGrid();
+        else renderList();
+        updateStats();
+    }
     function updateStats() {
         const filtered = getFilteredData();
         document.getElementById('filteredCount').innerText = filtered.length;
         document.getElementById('totalCount').innerText = peopleData.length;
-        document.getElementById('followupCount').innerText = peopleData.filter(p => p.needFollowup).length;
     }
     function renderGrid() {
         const filtered = getFilteredData();
@@ -520,53 +418,35 @@
         grid.innerHTML = '';
         const q = document.getElementById('searchBox').value.trim();
         filtered.forEach(p => {
-            const card = document.createElement('div'); card.className = 'person-card';
+            const card = document.createElement('div');
+            card.className = 'person-card';
             const nameHtml = highlightText(p.name, q);
             const phoneHtml = highlightText(p.phone, q);
-            let callsHtml = '';
-            if (p.callLogs && p.callLogs.length) {
-                callsHtml = `<div class="call-logs-section"><strong>📞 কল লগ:</strong>`;
-                p.callLogs.slice(0,3).forEach(c => {
-                    let oc = '';
-                    if (c.outcome === 'Ready') oc = 'call-outcome-ready';
-                    else if (c.outcome === 'Denied') oc = 'call-outcome-denied';
-                    else if (c.outcome === 'Reject') oc = 'call-outcome-reject';
-                    else if (c.outcome === 'Followup') oc = 'call-outcome-followup';
-                    callsHtml += `<div class="call-item ${oc}">📅 ${c.date}<br><strong>${c.outcome}</strong>: ${highlightText(c.note, q)}</div>`;
-                });
-                callsHtml += `</div>`;
-            }
-            let tasksHtml = '';
-            if (p.tasks && p.tasks.length) {
-                tasksHtml = `<div class="call-logs-section"><strong>📋 টাস্ক:</strong>`;
-                p.tasks.forEach(t => {
-                    tasksHtml += `<div class="call-item" style="border-left-color:#8b5cf6;">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskDone(${p.id}, ${t.id})">
-                        ${highlightText(t.title, q)}
-                        <button class="icon-btn" style="float:right;" onclick="deleteTask(${p.id}, ${t.id})">🗑️</button>
-                    </div>`;
-                });
-                tasksHtml += `</div>`;
-            }
+            const areaHtml = highlightText(p.area || '', q);
+            const roleHtml = highlightText(p.role || '', q);
+            const clusterHtml = highlightText(p.cluster || '', q);
+            const noteHtml = highlightText(p.note || '', q);
             card.innerHTML = `
-                <div class="card-header" onclick="window.location.href='tel:+91${cleanIndianPhone(p.phone)}'">
-                    <div class="person-name">${nameHtml}</div>
+                <div class="card-header">
+                    <div class="person-name">${nameHtml || 'নাম নেই'}</div>
                     <div class="person-phone">📞 ${phoneHtml}</div>
                 </div>
                 <div class="detail-row">
-                    ${p.area ? `<span class="detail-badge">📍 ${highlightText(p.area, q)}</span>` : ''}
-                    ${p.role ? `<span class="detail-badge">👤 ${highlightText(p.role, q)}</span>` : ''}
-                    ${p.cluster ? `<span class="detail-badge">🔘 ${highlightText(p.cluster, q)}</span>` : ''}
-                    ${p.needFollowup ? `<span class="detail-badge followup-badge">⚠️ ফলোআপ দরকার</span>` : ''}
+                    ${p.area ? `<span class="detail-badge">📍 ${areaHtml}</span>` : ''}
+                    ${p.role ? `<span class="detail-badge">👤 ${roleHtml}</span>` : ''}
+                    ${p.cluster ? `<span class="detail-badge">🔘 ${clusterHtml}</span>` : ''}
                 </div>
-                ${callsHtml}
-                ${tasksHtml}
+                ${p.note ? `<div class="note-text">📝 ${noteHtml}</div>` : ''}
                 <div class="card-actions">
-                    <button class="icon-btn" onclick="showCallLogModal(${p.id})">📝 কল লগ</button>
-                    <button class="icon-btn" onclick="quickAddTask(${p.id})">➕ টাস্ক</button>
-                    <button class="icon-btn" onclick="window.open('https://wa.me/91${cleanIndianPhone(p.phone)}', '_blank')">💬 হোয়াটসঅ্যাপ</button>
-                    <button class="icon-btn edit-person" data-id="${p.id}">✏️ এডিট</button>
-                    <button class="icon-btn delete-person" data-id="${p.id}">🗑️ ডিলিট</button>
+                    <button class="icon-btn call-btn" data-phone="${p.phone}" title="কল">📞 কল</button>
+                    <button class="icon-btn wa-btn" data-phone="${p.phone}" title="হোয়াটসঅ্যাপ">💬 হোয়াটসঅ্যাপ</button>
+                    <div class="kebab-wrapper">
+                        <button class="icon-btn kebab-btn">⋮</button>
+                        <div class="kebab-menu">
+                            <button class="edit-person" data-id="${p.id}">✏️ এডিট</button>
+                            <button class="delete-person" data-id="${p.id}">🗑️ ডিলিট</button>
+                        </div>
+                    </div>
                 </div>
             `;
             grid.appendChild(card);
@@ -581,51 +461,139 @@
         filtered.forEach(p => {
             const row = tbody.insertRow();
             row.insertCell(0).innerHTML = highlightText(p.name, q);
-            row.insertCell(1).innerHTML = `<a href="tel:+91${cleanIndianPhone(p.phone)}" style="text-decoration:none;">${highlightText(p.phone, q)}</a>`;
+            row.insertCell(1).innerHTML = `<a href="tel:+91${cleanIndianPhone(p.phone)}">${highlightText(p.phone, q)}</a>`;
             row.insertCell(2).innerHTML = highlightText(p.area || '', q);
             row.insertCell(3).innerHTML = highlightText(p.role || '', q);
-            const lastOutcome = p.callLogs && p.callLogs[0] ? p.callLogs[0].outcome : '-';
-            row.insertCell(4).innerHTML = lastOutcome;
-            row.insertCell(5).innerHTML = p.needFollowup ? 'হ্যাঁ' : 'না';
-            const actions = row.insertCell(6);
-            actions.innerHTML = `<button class="icon-btn" onclick="showCallLogModal(${p.id})">📝</button><button class="icon-btn" onclick="window.open('https://wa.me/91${cleanIndianPhone(p.phone)}', '_blank')">💬</button><button class="icon-btn" onclick="quickEdit(${p.id})">✏️</button><button class="icon-btn" onclick="quickDelete(${p.id})">🗑️</button>`;
+            row.insertCell(4).innerHTML = highlightText(p.note || '', q);
+            const actions = row.insertCell(5);
+            actions.innerHTML = `
+                <button class="icon-btn call-list" data-phone="${p.phone}" style="background:none;">📞</button>
+                <button class="icon-btn wa-list" data-phone="${p.phone}" style="background:none;">💬</button>
+                <button class="icon-btn edit-list" data-id="${p.id}">✏️</button>
+                <button class="icon-btn delete-list" data-id="${p.id}">🗑️</button>
+            `;
         });
+        attachListEvents();
     }
     function attachCardEvents() {
-        document.querySelectorAll('.edit-person').forEach(btn => btn.addEventListener('click', (e) => loadPersonToForm(peopleData.find(p => p.id == btn.dataset.id))));
-        document.querySelectorAll('.delete-person').forEach(btn => btn.addEventListener('click', (e) => deletePersonWithPassword(parseInt(btn.dataset.id))));
+        // কল ও হোয়াটসঅ্যাপ
+        document.querySelectorAll('.call-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const phone = cleanIndianPhone(btn.dataset.phone);
+                if (phone) window.location.href = `tel:+91${phone}`;
+            });
+        });
+        document.querySelectorAll('.wa-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const phone = cleanIndianPhone(btn.dataset.phone);
+                if (phone) window.open(`https://wa.me/91${phone}`, '_blank');
+            });
+        });
+        // কেবা মেনু টগল
+        document.querySelectorAll('.kebab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const menu = btn.nextElementSibling;
+                document.querySelectorAll('.kebab-menu').forEach(m => { if (m !== menu) m.style.display = 'none'; });
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+        document.querySelectorAll('.edit-person').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.dataset.id);
+                const person = peopleData.find(p => p.id === id);
+                if (person) loadPersonToForm(person);
+                btn.closest('.kebab-menu').style.display = 'none';
+            });
+        });
+        document.querySelectorAll('.delete-person').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.dataset.id);
+                deletePersonWithPassword(id);
+                btn.closest('.kebab-menu').style.display = 'none';
+            });
+        });
+        // ক্লিক করলে মেনু বন্ধ
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.kebab-menu').forEach(m => m.style.display = 'none');
+        });
     }
-    window.showCallLogModal = showCallLogModal;
-    window.quickAddTask = (id) => { const title = prompt("টাস্ক লিখুন:"); if(title) addTask(id, title); };
-    window.toggleTaskDone = toggleTaskDone;
-    window.deleteTask = deleteTask;
-    window.quickEdit = (id) => loadPersonToForm(peopleData.find(p => p.id == id));
-    window.quickDelete = (id) => deletePersonWithPassword(id);
+    function attachListEvents() {
+        document.querySelectorAll('.call-list').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const phone = cleanIndianPhone(btn.dataset.phone);
+                if (phone) window.location.href = `tel:+91${phone}`;
+            });
+        });
+        document.querySelectorAll('.wa-list').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const phone = cleanIndianPhone(btn.dataset.phone);
+                if (phone) window.open(`https://wa.me/91${phone}`, '_blank');
+            });
+        });
+        document.querySelectorAll('.edit-list').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.dataset.id);
+                const person = peopleData.find(p => p.id === id);
+                if (person) loadPersonToForm(person);
+            });
+        });
+        document.querySelectorAll('.delete-list').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.dataset.id);
+                deletePersonWithPassword(id);
+            });
+        });
+    }
+
+    // পাসওয়ার্ড সুরক্ষিত ডিলিট
     function deletePersonWithPassword(id) {
-        if (prompt("পাসওয়ার্ড:") !== ADMIN_PASSWORD) return alert("ভুল পাসওয়ার্ড");
-        if (confirm("ডিলিট?")) { peopleData = peopleData.filter(p => p.id !== id); saveCurrentProjectData(); updateAll(); if(document.getElementById('editId').value == id) resetFormToAddMode(); alert("ডিলিট হয়েছে"); }
-    }
-    function resetCurrentProject() {
-        if (prompt("রিসেট করতে পাসওয়ার্ড দিন:") !== ADMIN_PASSWORD) return alert("ভুল");
-        if (confirm("বর্তমান প্রকল্পের সব ডেটা মুছে ডিফল্ট উদাহরণ লোড হবে?")) {
-            peopleData = [
-                { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়", tasks:[], callLogs:[], needFollowup:false },
-                { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন", tasks:[], callLogs:[{id:101, date:"2026-04-10", outcome:"Followup", note:"ফোন ধরেনি"}], needFollowup:true }
-            ];
-            saveCurrentProjectData();
-            updateAll();
-            resetFormToAddMode();
-            toggleForm(false);
-            showToast("প্রকল্প রিসেট হয়েছে");
+        const pwd = prompt("🔐 ডিলিট করতে পাসওয়ার্ড দিন:");
+        if (pwd !== ADMIN_PASSWORD) {
+            alert("ভুল পাসওয়ার্ড! ডিলিট বাতিল।");
+            return;
+        }
+        if (confirm("নিশ্চিত ডিলিট?")) {
+            peopleData = peopleData.filter(p => p.id !== id);
+            saveToStorage();
+            if (document.getElementById('editId').value == id) resetFormToAddMode();
+            showToast("✅ সদস্য ডিলিট হয়েছে");
         }
     }
+    function resetDataWithPassword() {
+        const pwd = prompt("🔐 রিসেট করতে পাসওয়ার্ড দিন:");
+        if (pwd !== ADMIN_PASSWORD) {
+            alert("ভুল পাসওয়ার্ড! রিসেট বাতিল।");
+            return;
+        }
+        if (confirm("সব ডেটা ডিফল্ট উদাহরণ দিয়ে রিসেট হবে। নিশ্চিত?")) {
+            loadDefaultData();
+            saveToStorage();
+            resetFormToAddMode();
+            toggleForm(false);
+            showToast("ডেটা রিসেট হয়েছে");
+        }
+    }
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
     // ফর্ম
-    function toggleForm(show) { document.getElementById('formCard').style.display = show ? 'block' : 'none'; }
+    function toggleForm(show) {
+        const fc = document.getElementById('formCard');
+        fc.classList.toggle('show', show);
+    }
     function resetFormToAddMode() {
-        document.getElementById('peopleForm').reset(); document.getElementById('editId').value = '';
-        document.getElementById('formTitle').innerText = '➕ নতুন সদস্য';
+        document.getElementById('peopleForm').reset();
+        document.getElementById('editId').value = '';
+        document.getElementById('formTitle').innerHTML = '➕ নতুন সদস্য যোগ করুন';
         document.getElementById('submitBtn').innerHTML = '➕ যোগ করুন';
         document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('phoneHint').innerHTML = '';
     }
     function loadPersonToForm(p) {
         document.getElementById('name').value = p.name;
@@ -636,75 +604,121 @@
         document.getElementById('cluster').value = p.cluster || '';
         document.getElementById('note').value = p.note || '';
         document.getElementById('editId').value = p.id;
-        document.getElementById('formTitle').innerText = '✏️ সদস্য এডিট';
-        document.getElementById('submitBtn').innerHTML = '💾 আপডেট';
+        document.getElementById('formTitle').innerHTML = '✏️ সদস্য এডিট করুন';
+        document.getElementById('submitBtn').innerHTML = '💾 আপডেট করুন';
         document.getElementById('cancelEditBtn').style.display = 'inline-block';
         toggleForm(true);
-        window.scrollTo({ top: 0 });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     function savePerson(e) {
         e.preventDefault();
         const name = document.getElementById('name').value.trim();
         let rawPhone = document.getElementById('phone').value.trim();
-        if (!name || !rawPhone) return alert("নাম ও ফোন দিন");
-        if (!isValidIndianPhone(rawPhone)) return alert("ভারতীয় ফোন দিন");
+        if (!name) return alert('নাম দিন');
+        if (!rawPhone) return alert('ফোন দিন');
+        if (!isValidIndianPhone(rawPhone)) return alert('ভারতীয় মোবাইল নম্বর দিন (10 ডিজিট, 6/7/8/9 দিয়ে শুরু)');
         const editId = document.getElementById('editId').value;
         const cleanedPhone = cleanIndianPhone(rawPhone);
-        let isEditingSame = false;
-        if (editId) { const curr = peopleData.find(p => p.id == editId); if (curr && cleanIndianPhone(curr.phone) === cleanedPhone) isEditingSame = true; }
-        if (!isEditingSame && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) return alert("ফোন নম্বর ডুপ্লিকেট!");
-        const area = document.getElementById('area').value.trim(), role = document.getElementById('role').value.trim(), cluster = document.getElementById('cluster').value.trim(), note = document.getElementById('note').value.trim();
+        let isEditingSamePhone = false;
+        if (editId) {
+            const curr = peopleData.find(p => p.id == editId);
+            if (curr && cleanIndianPhone(curr.phone) === cleanedPhone) isEditingSamePhone = true;
+        }
+        if (!isEditingSamePhone && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) {
+            return alert('এই ফোন নম্বরটি আগে থেকেই আছে!');
+        }
+        const area = document.getElementById('area').value.trim();
+        const role = document.getElementById('role').value.trim();
+        const cluster = document.getElementById('cluster').value.trim();
+        const note = document.getElementById('note').value.trim();
         if (!editId) {
             const newId = peopleData.length ? Math.max(...peopleData.map(p => p.id)) + 1 : 1;
-            peopleData.push({ id: newId, name, phone: cleanedPhone, area, role, cluster, note, tasks: [], callLogs: [], needFollowup: false });
+            peopleData.push({ id: newId, name, phone: cleanedPhone, area, role, cluster, note });
         } else {
             const idx = peopleData.findIndex(p => p.id == editId);
             if (idx !== -1) peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
             resetFormToAddMode();
         }
-        saveCurrentProjectData();
-        updateAll();
+        saveToStorage();
         resetFormToAddMode();
         toggleForm(false);
     }
+
+    // CSV এক্সপোর্ট
     function exportToCSV() {
         if (!peopleData.length) return alert("কোন ডেটা নেই");
-        const headers = ["ID","নাম","ফোন","এলাকা","রোল","ক্লাস্টার","নোট","কল লগ","ফলোআপ প্রয়োজন"];
+        const headers = ["ID","নাম","ফোন","এলাকা","রোল","ক্লাস্টার","নোট"];
         const rows = peopleData.map(p => [
-            p.id, `"${p.name}"`, p.phone, `"${p.area||''}"`, `"${p.role||''}"`, `"${p.cluster||''}"`, `"${p.note||''}"`,
-            `"${(p.callLogs||[]).map(c=>c.date+':'+c.outcome+':'+c.note).join('; ')}"`,
-            p.needFollowup ? "হ্যাঁ" : "না"
+            p.id, `"${p.name}"`, p.phone, `"${p.area||''}"`, `"${p.role||''}"`, `"${p.cluster||''}"`, `"${p.note||''}"`
         ]);
-        const csv = [headers, ...rows].map(row=>row.join(",")).join("\n");
-        const blob = new Blob(["\uFEFF"+csv], {type:"text/csv"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${projects[currentProjectId].name}_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+        const csv = [headers, ...rows].map(row => row.join(",")).join("\n");
+        const blob = new Blob(["\uFEFF" + csv], {type: "text/csv"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `people_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast("CSV ডাউনলোড হয়েছে");
     }
+    function exportToJSON() {
+        const dataStr = JSON.stringify(peopleData, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `people_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast("JSON ব্যাকআপ ডাউনলোড হয়েছে");
+    }
+    function importFromJSON(file) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const imported = JSON.parse(ev.target.result);
+                if (Array.isArray(imported)) {
+                    peopleData = imported.map((p, idx) => ({ ...p, id: p.id || idx+1 }));
+                    saveToStorage();
+                    alert("✅ ইমপোর্ট সফল!");
+                } else throw new Error();
+            } catch(e) { alert("ভুল JSON ফাইল"); }
+        };
+        reader.readAsText(file);
+    }
+    function loadDefaultData() {
+        peopleData = [
+            { id: 1, name: "রাহুল শর্মা", phone: "9876543210", area: "দিল্লি", role: "সদস্য", cluster: "উত্তর", note: "সক্রিয় কর্মী, নিয়মিত যোগাযোগ রাখতে হবে" },
+            { id: 2, name: "প্রিয়া সিং", phone: "9988776655", area: "মুম্বই", role: "নেত্রী", cluster: "পশ্চিম", note: "নতুন যোগদান, প্রশিক্ষণ প্রয়োজন" }
+        ];
+        saveToStorage();
+    }
+
     function populateFilters() {
         const roles = [...new Set(peopleData.map(p=>p.role).filter(r=>r))];
         const areas = [...new Set(peopleData.map(p=>p.area).filter(a=>a))];
         const clusters = [...new Set(peopleData.map(p=>p.cluster).filter(c=>c))];
-        const roleSel = document.getElementById('filterRole'), areaSel = document.getElementById('filterArea'), clusterSel = document.getElementById('filterCluster');
-        roleSel.innerHTML = '<option value="">সব রোল</option>'; areaSel.innerHTML = '<option value="">সব এলাকা</option>'; clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
+        const roleSel = document.getElementById('filterRole');
+        const areaSel = document.getElementById('filterArea');
+        const clusterSel = document.getElementById('filterCluster');
+        roleSel.innerHTML = '<option value="">সব রোল</option>';
+        areaSel.innerHTML = '<option value="">সব এলাকা</option>';
+        clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
         roles.forEach(r=>{let opt=document.createElement('option'); opt.value=r; opt.text=r; roleSel.appendChild(opt);});
         areas.forEach(a=>{let opt=document.createElement('option'); opt.value=a; opt.text=a; areaSel.appendChild(opt);});
         clusters.forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.text=c; clusterSel.appendChild(opt);});
     }
-    function updateAll() { rebuildFuse(); populateFilters(); render(); }
+    function updateAll() {
+        rebuildFuse();
+        populateFilters();
+        render();
+    }
+    function initData() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) peopleData = JSON.parse(stored);
+        else loadDefaultData();
+        updateAll();
+    }
 
-    // ======================= ট্যাব সুইচিং & ডার্ক মোড =======================
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabId = btn.dataset.tab;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(tabId + 'Tab').classList.add('active');
-        });
-    });
-    // ডার্ক মোড টগল (শুধু উদাহরণ, আপনি চাইলে বাটন যোগ করতে পারেন)
-    const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    if (darkModeMedia.matches) document.body.classList.add('dark');
-    // ইভেন্ট লিসেনার CRM
+    // ইভেন্ট লিসেনার
     document.getElementById('toggleFormBtn').addEventListener('click', () => toggleForm(true));
     document.getElementById('peopleForm').addEventListener('submit', savePerson);
     document.getElementById('cancelEditBtn').addEventListener('click', () => { resetFormToAddMode(); toggleForm(false); });
@@ -712,30 +726,22 @@
     document.getElementById('filterRole').addEventListener('change', () => render());
     document.getElementById('filterArea').addEventListener('change', () => render());
     document.getElementById('filterCluster').addEventListener('change', () => render());
-    document.getElementById('filterFollowup').addEventListener('change', () => render());
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
-    document.getElementById('resetDataBtn').addEventListener('click', resetCurrentProject);
+    document.getElementById('exportJsonBtn').addEventListener('click', exportToJSON);
+    document.getElementById('importFile').addEventListener('change', (e) => { if(e.target.files.length) importFromJSON(e.target.files[0]); e.target.value = ''; });
+    document.getElementById('resetDataBtn').addEventListener('click', resetDataWithPassword);
     document.getElementById('phone').addEventListener('input', validatePhoneField);
-    document.getElementById('projectSelect').addEventListener('change', (e) => switchProject(e.target.value));
-    document.getElementById('newProjectBtn').addEventListener('click', createNewProject);
-    document.getElementById('renameProjectBtn').addEventListener('click', renameCurrentProject);
-    document.getElementById('deleteProjectBtn').addEventListener('click', deleteCurrentProject);
-    document.getElementById('exportProjectBtn').addEventListener('click', exportCurrentProject);
-    document.getElementById('importProjectInput').addEventListener('change', (e) => { if(e.target.files.length) importToCurrentProject(e.target.files[0]); e.target.value=''; });
-    document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => {
-        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentView = btn.dataset.view;
-        document.getElementById('gridView').style.display = currentView === 'grid' ? 'block' : 'none';
-        document.getElementById('listView').classList.toggle('active', currentView === 'list');
-        render();
-    }));
-    // JSON ট্যাব ইভেন্ট
-    document.getElementById('jsonFileInput').addEventListener('change', (e) => { if (e.target.files.length) loadJsonFromFile(e.target.files[0]); e.target.value = ''; });
-    document.getElementById('exportJsonBtn').addEventListener('click', exportJson);
-    document.getElementById('resetJsonBtn').addEventListener('click', resetJson);
-
-    loadProjects();
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentView = btn.dataset.view;
+            document.getElementById('gridView').style.display = currentView === 'grid' ? 'block' : 'none';
+            document.getElementById('listView').classList.toggle('active', currentView === 'list');
+            render();
+        });
+    });
+    initData();
 </script>
 </body>
 </html>
