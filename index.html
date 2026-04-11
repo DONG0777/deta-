@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="bn">
-<head>
-    <meta charset="UTF-8">
+<!-- saved from url=(0049)file:///C:/Users/Admin/OneDrive/Desktop/test.html -->
+<html lang="bn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>প্রো CRM মাল্টি-প্রজেক্ট | কল লগ ও ফলোআপ</title>
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+    <script src="./প্রো CRM মাল্টি-প্রজেক্ট _ কল লগ ও ফলোআপ_files/fuse.js@7.0.0"></script>
     <style>
         :root {
             --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
@@ -87,13 +87,13 @@
 <div class="container">
     <div class="header">
         <h1>📊 মাল্টি-প্রজেক্ট CRM</h1>
-        <div><button id="themeToggleBtn" class="btn-sm" style="background: var(--card-bg); border-radius: 40px; padding: 6px 14px;">🌙 ডার্ক</button> <span class="btn-sm" style="background: #fef9c3; color: #1e293b;">🔐 admin123</span></div>
+        <div><button id="themeToggleBtn" class="btn-sm" style="background: var(--card-bg); border-radius: 40px; padding: 6px 14px;">🌙 ডার্ক</button> <span class="btn-sm" style="background: #fef9c3; color: #1e293b;">🔐 dong</span></div>
     </div>
 
     <!-- প্রজেক্ট ম্যানেজমেন্ট বার -->
     <div class="project-bar">
         <span>📁 প্রকল্প: </span>
-        <select id="projectSelect" class="project-select"></select>
+        <select id="projectSelect" class="project-select"><option value="proj_default">নাগরাকাটা বিধানসভা</option></select>
         <button id="newProjectBtn" class="btn-sm btn-outline">➕ নতুন</button>
         <button id="renameProjectBtn" class="btn-sm btn-outline">✏️ নাম বদলাও</button>
         <button id="deleteProjectBtn" class="btn-sm btn-danger">🗑️ ডিলিট</button>
@@ -108,8 +108,8 @@
         <h2 id="formTitle">➕ নতুন সদস্য</h2>
         <form id="peopleForm">
             <div class="form-grid">
-                <div class="form-group"><label>নাম *</label><input type="text" id="name" required></div>
-                <div class="form-group"><label>ফোন *</label><input type="tel" id="phone" required><span id="phoneHint"></span></div>
+                <div class="form-group"><label>নাম *</label><input type="text" id="name" required=""></div>
+                <div class="form-group"><label>ফোন *</label><input type="tel" id="phone" required=""><span id="phoneHint"></span></div>
                 <div class="form-group"><label>এলাকা</label><input type="text" id="area"></div>
                 <div class="form-group"><label>রোল</label><input type="text" id="role"></div>
                 <div class="form-group"><label>ক্লাস্টার</label><input type="text" id="cluster"></div>
@@ -123,9 +123,9 @@
     <div class="card">
         <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, কল নোট...">
         <div class="filters">
-            <select id="filterRole"><option value="">সব রোল</option></select>
-            <select id="filterArea"><option value="">সব এলাকা</option></select>
-            <select id="filterCluster"><option value="">সব ক্লাস্টার</option></select>
+            <select id="filterRole"><option value="">সব রোল</option><option value="সদস্য">সদস্য</option><option value="নেত্রী">নেত্রী</option></select>
+            <select id="filterArea"><option value="">সব এলাকা</option><option value="দিল্লি">দিল্লি</option><option value="মুম্বই">মুম্বই</option></select>
+            <select id="filterCluster"><option value="">সব ক্লাস্টার</option><option value="উত্তর">উত্তর</option><option value="পশ্চিম">পশ্চিম</option></select>
             <select id="filterFollowup"><option value="">ফলোআপ প্রয়োজন</option><option value="yes">হ্যাঁ</option><option value="no">না</option></select>
         </div>
         <div class="view-toggle">
@@ -133,12 +133,54 @@
             <button class="view-btn" data-view="list">📋 লিস্ট ভিউ</button>
         </div>
         <div class="stats-row">
-            <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>মোট সদস্য</div></div>
-            <div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>দেখানো হচ্ছে</div></div>
-            <div class="stat-card"><div class="stat-number" id="followupCount">0</div><div>ফলোআপ প্রয়োজন</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalCount">2</div><div>মোট সদস্য</div></div>
+            <div class="stat-card"><div class="stat-number" id="filteredCount">2</div><div>দেখানো হচ্ছে</div></div>
+            <div class="stat-card"><div class="stat-number" id="followupCount">1</div><div>ফলোআপ প্রয়োজন</div></div>
         </div>
 
-        <div id="gridView" class="people-grid"></div>
+        <div id="gridView" class="people-grid"><div class="person-card">
+                <div class="card-header" onclick="window.location.href=&#39;tel:+919876543210&#39;">
+                    <div class="person-name">রাহুল শর্মা</div>
+                    <div class="person-phone">📞 9876543210</div>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-badge">📍 দিল্লি</span>
+                    <span class="detail-badge">👤 সদস্য</span>
+                    <span class="detail-badge">🔘 উত্তর</span>
+                    
+                </div>
+                
+                
+                <div class="card-actions">
+                    <button class="icon-btn" onclick="showCallLogModal(1)">📝 কল লগ</button>
+                    <button class="icon-btn" onclick="quickAddTask(1)">➕ টাস্ক</button>
+                    <button class="icon-btn" onclick="window.open(&#39;https://wa.me/919876543210&#39;, &#39;_blank&#39;)">💬 হোয়াটসঅ্যাপ</button>
+                    <button class="icon-btn edit-person" data-id="1">✏️ এডিট</button>
+                    <button class="icon-btn delete-person" data-id="1">🗑️ ডিলিট</button>
+                </div>
+            </div><div class="person-card">
+                <div class="card-header" onclick="window.location.href=&#39;tel:+919988776655&#39;">
+                    <div class="person-name">প্রিয়া সিং</div>
+                    <div class="person-phone">📞 9988776655</div>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-badge">📍 মুম্বই</span>
+                    <span class="detail-badge">👤 নেত্রী</span>
+                    <span class="detail-badge">🔘 পশ্চিম</span>
+                    <span class="detail-badge followup-badge">⚠️ ফলোআপ দরকার</span>
+                </div>
+                <div class="call-logs-section"><strong>📞 কল লগ:</strong><div class="call-item call-outcome-followup">
+                        📅 2026-04-10<br><strong>Followup</strong>: ফোন ধরেনি
+                    </div></div>
+                
+                <div class="card-actions">
+                    <button class="icon-btn" onclick="showCallLogModal(2)">📝 কল লগ</button>
+                    <button class="icon-btn" onclick="quickAddTask(2)">➕ টাস্ক</button>
+                    <button class="icon-btn" onclick="window.open(&#39;https://wa.me/919988776655&#39;, &#39;_blank&#39;)">💬 হোয়াটসঅ্যাপ</button>
+                    <button class="icon-btn edit-person" data-id="2">✏️ এডিট</button>
+                    <button class="icon-btn delete-person" data-id="2">🗑️ ডিলিট</button>
+                </div>
+            </div></div>
         <div id="listView" class="list-view"><table><thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>শেষ কলের ফল</th><th>ফলোআপ</th><th>অ্যাকশন</th></tr></thead><tbody id="listTableBody"></tbody></table></div>
 
         <div class="btn-group">
@@ -613,5 +655,6 @@
     }));
     loadProjects();
 </script>
-</body>
-</html>
+
+
+</body></html>
