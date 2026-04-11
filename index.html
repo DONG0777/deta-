@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>প্রো পিপল ম্যানেজার - গুগল শীট (CORS ফিক্সড)</title>
+    <title>প্রো পিপল ম্যানেজার - গুগল শীট (সার্বজনীন)</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
@@ -59,7 +59,7 @@
         <h1>👥 প্রো পিপল ম্যানেজার (গুগল শীট)</h1>
         <div class="lock-badge">🔐 ডিলিট/রিসেটে পাসওয়ার্ড লাগে</div>
     </div>
-    <div id="corsWarning" class="cors-warning">⚠️ CORS সমস্যার কারণে সরাসরি সংযোগ ব্যর্থ। নিচের "URL পরীক্ষা" বাটনে ক্লিক করে দেখুন। যদি কাজ না করে, অনুগ্রহ করে Apps Script Web App টি পুনরায় ডিপ্লয় করুন "Anyone" অ্যাক্সেস দিয়ে।</div>
+    <div id="corsWarning" class="cors-warning">⚠️ CORS সমস্যার কারণে শীট সংযোগ বিচ্ছিন্ন। নিচের "URL পরীক্ষা" বাটনে ক্লিক করুন।</div>
     <div class="card sync-config">
         <span>📡 গুগল শীট সিঙ্ক</span>
         <button id="pullFromSheetsBtn" class="btn btn-success">📥 শীট থেকে টেনে আনুন</button>
@@ -222,60 +222,66 @@
         clusters.forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.text=c; clusterSel.appendChild(opt);});
     }
 
-    // ---------- শীট API কল (CORS-সচেতন) ----------
+    // ---------- শীট API কল (স্মার্ট ফ্যালব্যাক) ----------
     async function callSheetsAPI(action, payload = null) {
         const url = SHEETS_API_URL;
-        if (!url) throw new Error('API URL নেই');
         const params = new URLSearchParams({ action });
-        // GET request (fetch) - JSONP পদ্ধতি ব্যবহার করি CORS বাইপাস করতে
-        if (!payload) {
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonp_callback_' + Date.now() + '_' + Math.floor(Math.random()*100000);
-                const script = document.createElement('script');
-                const timeout = setTimeout(() => {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    reject(new Error('JSONP timeout'));
-                }, 10000);
-                window[callbackName] = (data) => {
-                    clearTimeout(timeout);
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(data);
-                };
-                script.src = `${url}?${params.toString()}&callback=${callbackName}`;
-                script.onerror = () => {
-                    clearTimeout(timeout);
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    reject(new Error('JSONP load error (CORS?)'));
-                };
-                document.body.appendChild(script);
-            });
+        let fetchUrl = `${url}?${params.toString()}`;
+        let options = { method: 'GET', mode: 'cors' };
+        if (payload) {
+            options = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), mode: 'cors' };
+        }
+        const res = await fetch(fetchUrl, options);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+    }
+
+    async function callSheetsAPISafe(action, payload = null) {
+        if (payload) {
+            // POST - সরাসরি fetch (CORS হেডার লাগবে)
+            return await callSheetsAPI(action, payload);
         } else {
-            // POST request - আমরা সরাসরি fetch চেষ্টা করব, CORS হেডার প্রয়োজন
-            const response = await fetch(`${url}?${params.toString()}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-                mode: 'cors'
-            });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            if (data.error) throw new Error(data.error);
-            return data;
+            // GET - fetch চেষ্টা, না হলে JSONP
+            try {
+                return await callSheetsAPI(action);
+            } catch (err) {
+                console.warn('Fetch failed, falling back to JSONP', err);
+                return new Promise((resolve, reject) => {
+                    const cb = 'jsonp_' + Date.now() + '_' + Math.random().toString(36);
+                    const script = document.createElement('script');
+                    const timeout = setTimeout(() => {
+                        delete window[cb];
+                        document.body.removeChild(script);
+                        reject(new Error('JSONP timeout'));
+                    }, 10000);
+                    window[cb] = (data) => {
+                        clearTimeout(timeout);
+                        delete window[cb];
+                        document.body.removeChild(script);
+                        resolve(data);
+                    };
+                    script.src = `${SHEETS_API_URL}?action=${action}&callback=${cb}`;
+                    script.onerror = () => {
+                        clearTimeout(timeout);
+                        delete window[cb];
+                        document.body.removeChild(script);
+                        reject(new Error('JSONP load error'));
+                    };
+                    document.body.appendChild(script);
+                });
+            }
         }
     }
 
     async function testUrl() {
         showLoading('URL পরীক্ষা...');
         try {
-            const result = await callSheetsAPI('fetch');
-            alert(`সফল! ${result.length}টি রেকর্ড পাওয়া গেছে।`);
+            const result = await callSheetsAPISafe('fetch');
+            alert(`✅ সফল! ${result.length}টি রেকর্ড পাওয়া গেছে।`);
             updateSyncStatus('✅ URL সঠিক');
             document.getElementById('corsWarning').style.display = 'none';
         } catch(err) {
-            alert(`URL ব্যর্থ:\n${err.message}\n\nসমাধান: Apps Script Web App পুনরায় ডিপ্লয় করুন "Execute as: Me" ও "Access: Anyone" দিয়ে।`);
+            alert(`❌ ব্যর্থ:\n${err.message}\n\nসমাধান: Apps Script Web App পুনরায় ডিপ্লয় করুন "Anyone" অ্যাক্সেস দিয়ে।`);
             updateSyncStatus('❌ URL ত্রুটি');
             document.getElementById('corsWarning').style.display = 'block';
         } finally { hideLoading(); }
@@ -284,7 +290,7 @@
     async function pullFromSheets() {
         showLoading('শীট থেকে ডেটা আনা হচ্ছে...');
         try {
-            const result = await callSheetsAPI('fetch');
+            const result = await callSheetsAPISafe('fetch');
             if (Array.isArray(result)) {
                 peopleData = result.map(row => ({
                     id: Number(row.id) || Date.now(),
@@ -307,10 +313,14 @@
         showLoading('শীটে আপলোড করা হচ্ছে...');
         try {
             const result = await callSheetsAPI('sync', { data: peopleData });
-            if (result.success) { updateSyncStatus(`✅ শীটে ${peopleData.length}টি রেকর্ড সেভ হয়েছে`); alert('শীট আপডেট সম্পন্ন!'); }
-            else throw new Error(result.error || 'অজানা ত্রুটি');
-        } catch(err) { alert('পুশ করতে ব্যর্থ: ' + err.message); updateSyncStatus('❌ পুশ ব্যর্থ'); }
-        finally { hideLoading(); }
+            if (result.success) {
+                updateSyncStatus(`✅ শীটে ${peopleData.length}টি রেকর্ড সেভ হয়েছে`);
+                alert('শীট আপডেট সম্পন্ন!');
+            } else throw new Error(result.error || 'অজানা ত্রুটি');
+        } catch(err) {
+            alert('পুশ করতে ব্যর্থ: ' + err.message + '\n\nApps Script-এ CORS হেডার যোগ করতে হবে। উপরের নির্দেশনা অনুসরণ করুন।');
+            updateSyncStatus('❌ পুশ ব্যর্থ');
+        } finally { hideLoading(); }
     }
 
     async function savePerson(e) {
