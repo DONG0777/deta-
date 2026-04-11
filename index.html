@@ -3,26 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>প্রো CRM পিপল ম্যানেজার | কল লগ ও ফলোআপ</title>
+    <title>প্রো CRM মাল্টি-প্রজেক্ট | কল লগ ও ফলোআপ</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
         :root {
             --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
             --card-bg: rgba(255,255,255,0.96);
             --text-primary: #1a2c3e;
-            --text-secondary: #2c4c6e;
             --border-light: #e2edf7;
             --badge-bg: #f1f5f9;
-            --btn-outline-border: #cbd5e6;
         }
         body.dark {
             --bg-gradient: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
             --card-bg: #1e293b;
             --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e6;
             --border-light: #334155;
             --badge-bg: #334155;
-            --btn-outline-border: #475569;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -33,21 +29,23 @@
             transition: background 0.3s;
         }
         .container { max-width: 1200px; margin: 0 auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 24px; gap: 12px; }
-        h1 { font-size: 1.7rem; font-weight: 800; background: linear-gradient(135deg, #3b82f6, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .theme-toggle, .lock-badge { background: var(--card-bg); border-radius: 40px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; }
-        .card { background: var(--card-bg); border-radius: 32px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15); transition: background 0.3s; }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+        h1 { font-size: 1.6rem; background: linear-gradient(135deg, #3b82f6, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .project-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; background: var(--card-bg); padding: 12px 20px; border-radius: 60px; }
+        .project-select { padding: 8px 16px; border-radius: 40px; border: 1px solid var(--border-light); background: var(--card-bg); color: var(--text-primary); flex: 1; }
+        .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+        .card { background: var(--card-bg); border-radius: 32px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15); }
         .form-card { display: none; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; margin-bottom: 1rem; }
         .form-group { display: flex; flex-direction: column; gap: 6px; }
-        label { font-weight: 700; font-size: 0.75rem; color: var(--text-secondary); }
+        label { font-weight: 700; font-size: 0.75rem; color: var(--text-primary); opacity: 0.8; }
         input, select, textarea { padding: 12px 16px; border: 1.5px solid var(--border-light); border-radius: 28px; background: var(--card-bg); color: var(--text-primary); }
         .btn { padding: 10px 18px; border-radius: 40px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
         .btn-primary { background: #2563eb; color: white; }
         .btn-success { background: #10b981; color: white; }
         .btn-danger { background: #ef4444; color: white; }
         .btn-warning { background: #f59e0b; color: white; }
-        .btn-outline { background: transparent; border: 1.5px solid var(--btn-outline-border); }
+        .btn-outline { background: transparent; border: 1.5px solid var(--border-light); }
         .btn-new { width: 100%; background: #1e2f3f; color: white; padding: 14px; margin-bottom: 8px; }
         .btn-group { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 16px; }
         .search-box { width: 100%; padding: 12px 20px; border-radius: 60px; border: 1.5px solid var(--border-light); background: var(--card-bg); margin-bottom: 1rem; }
@@ -57,8 +55,9 @@
         .view-btn.active { background: #2563eb; color: white; }
         .people-grid { display: flex; flex-direction: column; gap: 16px; }
         .person-card { background: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-light); }
-        .card-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; }
+        .card-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; cursor: pointer; }
         .person-name { font-size: 1.3rem; font-weight: 800; }
+        .person-phone { font-size: 0.85rem; background: var(--badge-bg); padding: 4px 12px; border-radius: 40px; }
         .detail-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
         .detail-badge { background: var(--badge-bg); padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; }
         .call-logs-section { margin-top: 12px; background: var(--badge-bg); border-radius: 20px; padding: 10px; }
@@ -68,7 +67,7 @@
         .call-outcome-reject { border-left-color: #f59e0b; }
         .call-outcome-followup { border-left-color: #a855f7; }
         .followup-badge { background: #fee2e2; color: #991b1b; }
-        .card-actions, .list-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px; }
+        .card-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px; }
         .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 4px 10px; border-radius: 40px; }
         .list-view { overflow-x: auto; display: none; }
         .list-view.active { display: block; }
@@ -87,9 +86,22 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>📞 প্রো CRM কল ম্যানেজার</h1>
-        <div><button id="themeToggleBtn" class="theme-toggle">🌙 ডার্ক মোড</button><span class="lock-badge">🔐 পাসওয়ার্ড: admin123</span></div>
+        <h1>📊 মাল্টি-প্রজেক্ট CRM</h1>
+        <div><button id="themeToggleBtn" class="btn-sm" style="background: var(--card-bg); border-radius: 40px; padding: 6px 14px;">🌙 ডার্ক</button> <span class="btn-sm" style="background: #fef9c3; color: #1e293b;">🔐 admin123</span></div>
     </div>
+
+    <!-- প্রজেক্ট ম্যানেজমেন্ট বার -->
+    <div class="project-bar">
+        <span>📁 প্রকল্প: </span>
+        <select id="projectSelect" class="project-select"></select>
+        <button id="newProjectBtn" class="btn-sm btn-outline">➕ নতুন</button>
+        <button id="renameProjectBtn" class="btn-sm btn-outline">✏️ নাম বদলাও</button>
+        <button id="deleteProjectBtn" class="btn-sm btn-danger">🗑️ ডিলিট</button>
+        <button id="exportProjectBtn" class="btn-sm btn-primary">📎 JSON এক্সপোর্ট</button>
+        <label for="importProjectInput" class="btn-sm btn-outline" style="cursor:pointer;">📂 JSON ইমপোর্ট</label>
+        <input type="file" id="importProjectInput" accept=".json" style="display:none;">
+    </div>
+
     <button id="toggleFormBtn" class="btn btn-new">➕ নতুন সদস্য যোগ করুন</button>
 
     <div id="formCard" class="card form-card">
@@ -109,7 +121,7 @@
     </div>
 
     <div class="card">
-        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, টাস্ক, কল নোট...">
+        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, কল নোট...">
         <div class="filters">
             <select id="filterRole"><option value="">সব রোল</option></select>
             <select id="filterArea"><option value="">সব এলাকা</option></select>
@@ -127,31 +139,138 @@
         </div>
 
         <div id="gridView" class="people-grid"></div>
-        <div id="listView" class="list-view">
-            <table>
-                <thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>শেষ কলের ফল</th><th>ফলোআপ</th><th>অ্যাকশন</th></tr></thead>
-                <tbody id="listTableBody"></tbody>
-            </table>
-        </div>
+        <div id="listView" class="list-view"><table><thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>শেষ কলের ফল</th><th>ফলোআপ</th><th>অ্যাকশন</th></tr></thead><tbody id="listTableBody"></tbody></table></div>
 
         <div class="btn-group">
             <button id="exportCsvBtn" class="btn btn-primary">📎 CSV (শীট)</button>
-            <button id="exportBtn" class="btn btn-warning">📁 JSON ব্যাকআপ</button>
-            <label for="importFile" class="btn btn-outline">📂 JSON ইমপোর্ট</label>
-            <input type="file" id="importFile" accept=".json" style="display:none;">
-            <button id="resetDataBtn" class="btn btn-danger">🔄 রিসেট</button>
+            <button id="resetDataBtn" class="btn btn-danger">🔄 রিসেট (ডিফল্ট)</button>
         </div>
     </div>
 </div>
 
 <script>
+    // ------------------- প্রজেক্ট ম্যানেজমেন্ট -------------------
     const ADMIN_PASSWORD = "admin123";
-    const STORAGE_KEY = "crmCallLogsPro";
-    let peopleData = [];
+    const STORAGE_PROJECTS_KEY = "crm_projects";
+    let projects = {};      // { projectId: { name, data: [] } }
+    let currentProjectId = null;
+    let peopleData = [];     // সক্রিয় প্রকল্পের ডেটা
     let fuseInstance = null;
     let currentView = 'grid';
 
-    // ফোন ফাংশন
+    // লোড প্রকল্প
+    function loadProjects() {
+        const stored = localStorage.getItem(STORAGE_PROJECTS_KEY);
+        if (stored) {
+            projects = JSON.parse(stored);
+        } else {
+            // ডিফল্ট প্রকল্প
+            const defaultData = [
+                { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়", tasks:[], callLogs:[], needFollowup:false },
+                { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন", tasks:[], callLogs:[{id:101, date:"2026-04-10", outcome:"Followup", note:"ফোন ধরেনি"}], needFollowup:true }
+            ];
+            projects = {
+                "proj_default": { name: "নাগরাকাটা বিধানসভা", data: defaultData }
+            };
+            saveProjects();
+        }
+        currentProjectId = localStorage.getItem("currentProjectId") || Object.keys(projects)[0];
+        if (!projects[currentProjectId]) currentProjectId = Object.keys(projects)[0];
+        refreshProjectSelect();
+        loadCurrentProjectData();
+    }
+    function saveProjects() {
+        localStorage.setItem(STORAGE_PROJECTS_KEY, JSON.stringify(projects));
+    }
+    function refreshProjectSelect() {
+        const sel = document.getElementById('projectSelect');
+        sel.innerHTML = '';
+        for (let id in projects) {
+            let opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = projects[id].name;
+            if (id === currentProjectId) opt.selected = true;
+            sel.appendChild(opt);
+        }
+    }
+    function loadCurrentProjectData() {
+        if (!currentProjectId || !projects[currentProjectId]) return;
+        peopleData = projects[currentProjectId].data || [];
+        // ডেটা স্বাভাবিক করা
+        peopleData.forEach(p => { if (!p.tasks) p.tasks = []; if (!p.callLogs) p.callLogs = []; });
+        updateAll();
+    }
+    function saveCurrentProjectData() {
+        if (currentProjectId && projects[currentProjectId]) {
+            projects[currentProjectId].data = peopleData;
+            saveProjects();
+        }
+    }
+    function switchProject(projectId) {
+        if (!projects[projectId]) return;
+        currentProjectId = projectId;
+        localStorage.setItem("currentProjectId", currentProjectId);
+        loadCurrentProjectData();
+        refreshProjectSelect();
+    }
+    function createNewProject() {
+        let name = prompt("নতুন প্রকল্পের নাম (যেমন: রাজারহাট বিধানসভা):");
+        if (!name) return;
+        const id = "proj_" + Date.now();
+        projects[id] = { name: name, data: [] };
+        saveProjects();
+        switchProject(id);
+        showToast(`✅ প্রকল্প "${name}" তৈরি হয়েছে`);
+    }
+    function renameCurrentProject() {
+        let newName = prompt("নতুন নাম দিন:", projects[currentProjectId].name);
+        if (newName) {
+            projects[currentProjectId].name = newName;
+            saveProjects();
+            refreshProjectSelect();
+            showToast("নাম পরিবর্তন হয়েছে");
+        }
+    }
+    function deleteCurrentProject() {
+        if (Object.keys(projects).length === 1) {
+            alert("শেষ প্রকল্প ডিলিট করা যাবে না। আগে অন্য প্রকল্প তৈরি করুন।");
+            return;
+        }
+        if (confirm(`"${projects[currentProjectId].name}" প্রকল্প মুছবেন? সব ডেটা চলে যাবে।`)) {
+            delete projects[currentProjectId];
+            saveProjects();
+            const newId = Object.keys(projects)[0];
+            switchProject(newId);
+            showToast("প্রকল্প ডিলিট হয়েছে");
+        }
+    }
+    function exportCurrentProject() {
+        const dataStr = JSON.stringify(peopleData, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${projects[currentProjectId].name}_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast("JSON ডাউনলোড হয়েছে");
+    }
+    function importToCurrentProject(file) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const imported = JSON.parse(ev.target.result);
+                if (Array.isArray(imported)) {
+                    peopleData = imported.map(p => ({ ...p, tasks: p.tasks||[], callLogs: p.callLogs||[] }));
+                    saveCurrentProjectData();
+                    updateAll();
+                    alert("ইমপোর্ট সফল");
+                } else throw new Error();
+            } catch(e) { alert("ভুল JSON ফাইল"); }
+        };
+        reader.readAsText(file);
+    }
+
+    // ------------------- ফোন ফাংশন -------------------
     function cleanIndianPhone(phone) {
         let cleaned = String(phone).replace(/[\s\-\(\)]/g, '');
         if (cleaned.startsWith('+91')) cleaned = cleaned.slice(3);
@@ -174,31 +293,7 @@
         return peopleData.some(p => (excludeId === null || p.id != excludeId) && cleanIndianPhone(p.phone) === cleaned);
     }
 
-    // স্টোরেজ
-    function saveToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData)); updateAll(); }
-    function rebuildFuse() { fuseInstance = new Fuse(peopleData, { keys: ['name','phone','area','role','cluster','note','callLogs.note'], threshold: 0.3 }); }
-    function getFilteredData() {
-        let filtered = peopleData;
-        const q = document.getElementById('searchBox').value.trim();
-        if (q) filtered = fuseInstance.search(q).map(r => r.item);
-        const role = document.getElementById('filterRole').value;
-        const area = document.getElementById('filterArea').value;
-        const cluster = document.getElementById('filterCluster').value;
-        const followup = document.getElementById('filterFollowup').value;
-        if (role) filtered = filtered.filter(p => p.role === role);
-        if (area) filtered = filtered.filter(p => p.area === area);
-        if (cluster) filtered = filtered.filter(p => p.cluster === cluster);
-        if (followup === 'yes') filtered = filtered.filter(p => p.needFollowup);
-        if (followup === 'no') filtered = filtered.filter(p => !p.needFollowup);
-        return filtered;
-    }
-    function highlightText(text, query) {
-        if (!query || !text) return text || '';
-        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return text.replace(regex, `<span class="highlight" style="background:#fef08a; color:#0f172a;">$1</span>`);
-    }
-
-    // কল লগ করার ফাংশন (মোডাল)
+    // ------------------- কল লগ -------------------
     function showCallLogModal(personId) {
         const person = peopleData.find(p => p.id == personId);
         if (!person) return;
@@ -206,8 +301,8 @@
         modal.className = 'modal';
         modal.innerHTML = `
             <div class="modal-content">
-                <h3 style="margin-bottom:16px;">📞 কল লগ করুন - ${person.name}</h3>
-                <select id="callOutcome" style="width:100%; margin-bottom:12px; padding:10px;">
+                <h3>📞 কলের ফলাফল ও নোট - ${person.name}</h3>
+                <select id="callOutcome" style="width:100%; margin:12px 0; padding:10px;">
                     <option value="Ready">✅ Ready (আগ্রহী)</option>
                     <option value="Denied">❌ Denied (অস্বীকৃত)</option>
                     <option value="Reject">🚫 Reject (প্রত্যাখ্যান)</option>
@@ -230,44 +325,60 @@
             showToast(`📞 কল লগ করা হয়েছে: ${outcome}`);
         };
     }
-
     function addCallLog(personId, outcome, note) {
         const person = peopleData.find(p => p.id == personId);
         if (!person) return;
         if (!person.callLogs) person.callLogs = [];
-        const newLog = {
-            id: Date.now(),
-            date: new Date().toLocaleString(),
-            outcome: outcome,
-            note: note
-        };
-        person.callLogs.unshift(newLog); // latest first
-        // ফলোআপ আপডেট: শুধুমাত্র Followup Needed থাকলে true, অন্যথায় false
+        person.callLogs.unshift({ id: Date.now(), date: new Date().toLocaleString(), outcome, note });
         person.needFollowup = (outcome === 'Followup');
-        saveToStorage();
+        saveCurrentProjectData();
+        updateAll();
     }
 
-    // টাস্ক ফাংশন (সহজ রাখা)
+    // টাস্ক
     function addTask(personId, title) {
         const person = peopleData.find(p => p.id == personId);
         if (!person) return;
         if (!person.tasks) person.tasks = [];
         person.tasks.push({ id: Date.now(), title, done: false });
-        saveToStorage();
+        saveCurrentProjectData();
+        updateAll();
         showToast("✅ টাস্ক যোগ হয়েছে");
     }
     function toggleTaskDone(personId, taskId) {
         const person = peopleData.find(p => p.id == personId);
         const task = person?.tasks?.find(t => t.id == taskId);
-        if (task) { task.done = !task.done; saveToStorage(); }
+        if (task) { task.done = !task.done; saveCurrentProjectData(); updateAll(); }
     }
     function deleteTask(personId, taskId) {
         const person = peopleData.find(p => p.id == personId);
         if (person && person.tasks) person.tasks = person.tasks.filter(t => t.id != taskId);
-        saveToStorage();
+        saveCurrentProjectData();
+        updateAll();
     }
 
-    // রেন্ডার
+    // ফিল্টার, ফিউজ, রেন্ডার
+    function rebuildFuse() { fuseInstance = new Fuse(peopleData, { keys: ['name','phone','area','role','cluster','note','callLogs.note'], threshold: 0.3 }); }
+    function getFilteredData() {
+        let filtered = peopleData;
+        const q = document.getElementById('searchBox').value.trim();
+        if (q) filtered = fuseInstance.search(q).map(r => r.item);
+        const role = document.getElementById('filterRole').value;
+        const area = document.getElementById('filterArea').value;
+        const cluster = document.getElementById('filterCluster').value;
+        const followup = document.getElementById('filterFollowup').value;
+        if (role) filtered = filtered.filter(p => p.role === role);
+        if (area) filtered = filtered.filter(p => p.area === area);
+        if (cluster) filtered = filtered.filter(p => p.cluster === cluster);
+        if (followup === 'yes') filtered = filtered.filter(p => p.needFollowup);
+        if (followup === 'no') filtered = filtered.filter(p => !p.needFollowup);
+        return filtered;
+    }
+    function highlightText(text, query) {
+        if (!query || !text) return text || '';
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, `<span style="background:#fef08a; color:#0f172a;">$1</span>`);
+    }
     function render() { currentView === 'grid' ? renderGrid() : renderList(); updateStats(); }
     function updateStats() {
         const filtered = getFilteredData();
@@ -285,7 +396,6 @@
             card.className = 'person-card';
             const nameHtml = highlightText(p.name, q);
             const phoneHtml = highlightText(p.phone, q);
-            // কল লগ দেখানো (সর্বশেষ ৩টি)
             let callsHtml = '';
             if (p.callLogs && p.callLogs.length) {
                 callsHtml = `<div class="call-logs-section"><strong>📞 কল লগ:</strong>`;
@@ -296,18 +406,16 @@
                     else if (c.outcome === 'Reject') outcomeClass = 'call-outcome-reject';
                     else if (c.outcome === 'Followup') outcomeClass = 'call-outcome-followup';
                     callsHtml += `<div class="call-item ${outcomeClass}">
-                        📅 ${c.date}<br>
-                        <strong>${c.outcome}</strong>: ${highlightText(c.note, q)}
+                        📅 ${c.date}<br><strong>${c.outcome}</strong>: ${highlightText(c.note, q)}
                     </div>`;
                 });
                 callsHtml += `</div>`;
             }
-            // টাস্ক (ঐচ্ছিক)
             let tasksHtml = '';
             if (p.tasks && p.tasks.length) {
                 tasksHtml = `<div class="call-logs-section"><strong>📋 টাস্ক:</strong>`;
                 p.tasks.forEach(t => {
-                    tasksHtml += `<div class="call-item ${t.done ? 'call-outcome-ready' : ''}" style="border-left-color:#8b5cf6;">
+                    tasksHtml += `<div class="call-item" style="border-left-color:#8b5cf6;">
                         <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskDone(${p.id}, ${t.id})">
                         ${highlightText(t.title, q)}
                         <button class="icon-btn" style="float:right;" onclick="deleteTask(${p.id}, ${t.id})">🗑️</button>
@@ -316,7 +424,10 @@
                 tasksHtml += `</div>`;
             }
             card.innerHTML = `
-                <div class="card-header"><div class="person-name">${nameHtml}</div><div class="person-phone">📞 ${phoneHtml}</div></div>
+                <div class="card-header" onclick="window.location.href='tel:+91${cleanIndianPhone(p.phone)}'">
+                    <div class="person-name">${nameHtml}</div>
+                    <div class="person-phone">📞 ${phoneHtml}</div>
+                </div>
                 <div class="detail-row">
                     ${p.area ? `<span class="detail-badge">📍 ${highlightText(p.area, q)}</span>` : ''}
                     ${p.role ? `<span class="detail-badge">👤 ${highlightText(p.role, q)}</span>` : ''}
@@ -326,7 +437,7 @@
                 ${callsHtml}
                 ${tasksHtml}
                 <div class="card-actions">
-                    <button class="icon-btn" onclick="showCallLogModal(${p.id})">📞 কল লগ</button>
+                    <button class="icon-btn" onclick="showCallLogModal(${p.id})">📝 কল লগ</button>
                     <button class="icon-btn" onclick="quickAddTask(${p.id})">➕ টাস্ক</button>
                     <button class="icon-btn" onclick="window.open('https://wa.me/91${cleanIndianPhone(p.phone)}', '_blank')">💬 হোয়াটসঅ্যাপ</button>
                     <button class="icon-btn edit-person" data-id="${p.id}">✏️ এডিট</button>
@@ -345,7 +456,7 @@
         filtered.forEach(p => {
             const row = tbody.insertRow();
             row.insertCell(0).innerHTML = highlightText(p.name, q);
-            row.insertCell(1).innerHTML = highlightText(p.phone, q);
+            row.insertCell(1).innerHTML = `<a href="tel:+91${cleanIndianPhone(p.phone)}" style="text-decoration:none; color:inherit;">${highlightText(p.phone, q)}</a>`;
             row.insertCell(2).innerHTML = highlightText(p.area || '', q);
             row.insertCell(3).innerHTML = highlightText(p.role || '', q);
             const lastOutcome = p.callLogs && p.callLogs[0] ? p.callLogs[0].outcome : '-';
@@ -353,7 +464,7 @@
             row.insertCell(5).innerHTML = p.needFollowup ? 'হ্যাঁ' : 'না';
             const actions = row.insertCell(6);
             actions.innerHTML = `
-                <button class="icon-btn" onclick="showCallLogModal(${p.id})" title="কল লগ">📞</button>
+                <button class="icon-btn" onclick="showCallLogModal(${p.id})" title="কল লগ">📝</button>
                 <button class="icon-btn" onclick="window.open('https://wa.me/91${cleanIndianPhone(p.phone)}', '_blank')" title="হোয়াটসঅ্যাপ">💬</button>
                 <button class="icon-btn" onclick="quickEdit(${p.id})">✏️</button>
                 <button class="icon-btn" onclick="quickDelete(${p.id})">🗑️</button>
@@ -373,11 +484,21 @@
 
     function deletePersonWithPassword(id) {
         if (prompt("পাসওয়ার্ড:") !== ADMIN_PASSWORD) return alert("ভুল পাসওয়ার্ড");
-        if (confirm("ডিলিট?")) { peopleData = peopleData.filter(p => p.id !== id); saveToStorage(); if(document.getElementById('editId').value == id) resetFormToAddMode(); alert("ডিলিট হয়েছে"); }
+        if (confirm("ডিলিট?")) { peopleData = peopleData.filter(p => p.id !== id); saveCurrentProjectData(); updateAll(); if(document.getElementById('editId').value == id) resetFormToAddMode(); alert("ডিলিট হয়েছে"); }
     }
-    function resetDataWithPassword() {
-        if (prompt("পাসওয়ার্ড:") !== ADMIN_PASSWORD) return alert("ভুল");
-        if (confirm("ডিফল্ট ডেটা লোড হবে?")) { loadDefaultData(); saveToStorage(); resetFormToAddMode(); toggleForm(false); }
+    function resetCurrentProject() {
+        if (prompt("রিসেট করতে পাসওয়ার্ড দিন:") !== ADMIN_PASSWORD) return alert("ভুল");
+        if (confirm("বর্তমান প্রকল্পের সব ডেটা মুছে ডিফল্ট উদাহরণ লোড হবে?")) {
+            peopleData = [
+                { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়", tasks:[], callLogs:[], needFollowup:false },
+                { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন", tasks:[], callLogs:[{id:101, date:"2026-04-10", outcome:"Followup", note:"ফোন ধরেনি"}], needFollowup:true }
+            ];
+            saveCurrentProjectData();
+            updateAll();
+            resetFormToAddMode();
+            toggleForm(false);
+            showToast("প্রকল্প রিসেট হয়েছে");
+        }
     }
 
     // ফর্ম
@@ -426,13 +547,15 @@
             if (idx !== -1) peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
             resetFormToAddMode();
         }
-        saveToStorage();
+        saveCurrentProjectData();
+        updateAll();
         resetFormToAddMode();
         toggleForm(false);
     }
 
-    // এক্সপোর্ট/ইমপোর্ট
+    // CSV এক্সপোর্ট
     function exportToCSV() {
+        if (!peopleData.length) return alert("কোন ডেটা নেই");
         const headers = ["ID","নাম","ফোন","এলাকা","রোল","ক্লাস্টার","নোট","কল লগ","ফলোআপ প্রয়োজন"];
         const rows = peopleData.map(p => [
             p.id, `"${p.name}"`, p.phone, `"${p.area||''}"`, `"${p.role||''}"`, `"${p.cluster||''}"`, `"${p.note||''}"`,
@@ -441,16 +564,9 @@
         ]);
         const csv = [headers, ...rows].map(row=>row.join(",")).join("\n");
         const blob = new Blob(["\uFEFF"+csv], {type:"text/csv"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `crm_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${projects[currentProjectId].name}_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
     }
-    function exportToJSON() { const dataStr = JSON.stringify(peopleData, null, 2); const blob = new Blob([dataStr], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `crm_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); }
-    function importFromJSON(file) { const reader = new FileReader(); reader.onload = ev => { try { const imported = JSON.parse(ev.target.result); if (Array.isArray(imported)) { peopleData = imported.map(p => ({ ...p, tasks: p.tasks||[], callLogs: p.callLogs||[] })); saveToStorage(); alert("ইমপোর্ট সফল"); } else throw new Error(); } catch(e) { alert("ভুল ফাইল"); } }; reader.readAsText(file); }
-    function loadDefaultData() {
-        peopleData = [
-            { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়", tasks:[], callLogs:[], needFollowup:false },
-            { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন", tasks:[], callLogs:[{id:101, date:"2026-04-10", outcome:"Followup", note:"ফোন ধরেনি, ফলোআপ দরকার"}], needFollowup:true }
-        ];
-    }
+
     function populateFilters() {
         const roles = [...new Set(peopleData.map(p=>p.role).filter(r=>r))];
         const areas = [...new Set(peopleData.map(p=>p.area).filter(a=>a))];
@@ -466,7 +582,7 @@
 
     // ডার্ক মোড
     const themeBtn = document.getElementById('themeToggleBtn');
-    themeBtn.addEventListener('click', () => { document.body.classList.toggle('dark'); themeBtn.innerText = document.body.classList.contains('dark') ? '☀️ লাইট মোড' : '🌙 ডার্ক মোড'; localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); });
+    themeBtn.addEventListener('click', () => { document.body.classList.toggle('dark'); themeBtn.innerText = document.body.classList.contains('dark') ? '☀️ লাইট' : '🌙 ডার্ক'; localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); });
     if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
     // ইভেন্ট লিসেনার
@@ -479,10 +595,14 @@
     document.getElementById('filterCluster').addEventListener('change', () => render());
     document.getElementById('filterFollowup').addEventListener('change', () => render());
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
-    document.getElementById('exportBtn').addEventListener('click', exportToJSON);
-    document.getElementById('importFile').addEventListener('change', (e) => { if(e.target.files.length) importFromJSON(e.target.files[0]); e.target.value=''; });
-    document.getElementById('resetDataBtn').addEventListener('click', resetDataWithPassword);
+    document.getElementById('resetDataBtn').addEventListener('click', resetCurrentProject);
     document.getElementById('phone').addEventListener('input', validatePhoneField);
+    document.getElementById('projectSelect').addEventListener('change', (e) => switchProject(e.target.value));
+    document.getElementById('newProjectBtn').addEventListener('click', createNewProject);
+    document.getElementById('renameProjectBtn').addEventListener('click', renameCurrentProject);
+    document.getElementById('deleteProjectBtn').addEventListener('click', deleteCurrentProject);
+    document.getElementById('exportProjectBtn').addEventListener('click', exportCurrentProject);
+    document.getElementById('importProjectInput').addEventListener('change', (e) => { if(e.target.files.length) importToCurrentProject(e.target.files[0]); e.target.value=''; });
     document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => {
         document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -491,8 +611,7 @@
         document.getElementById('listView').classList.toggle('active', currentView === 'list');
         render();
     }));
-    function initData() { const stored = localStorage.getItem(STORAGE_KEY); if(stored) peopleData = JSON.parse(stored); else loadDefaultData(); peopleData.forEach(p => { if (!p.tasks) p.tasks = []; if (!p.callLogs) p.callLogs = []; }); updateAll(); }
-    initData();
+    loadProjects();
 </script>
 </body>
 </html>
