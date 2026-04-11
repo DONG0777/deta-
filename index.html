@@ -109,7 +109,7 @@
     function hideLoading() { let ov = document.querySelector('.loading-overlay'); if(ov) ov.style.display='none'; }
     function updateSyncStatus(msg) { let sp = document.getElementById('syncStatus'); sp.innerText=msg; setTimeout(()=>{ if(sp.innerText===msg) sp.innerText=''; },4000); }
 
-    // ফোন ফাংশন
+    // Phone helpers
     function cleanIndianPhone(phone) {
         let cleaned = String(phone).replace(/[\s\-\(\)]/g, '');
         if (cleaned.startsWith('+91')) cleaned = cleaned.slice(3);
@@ -136,7 +136,7 @@
         });
     }
 
-    // লোকাল স্টোর ও রেন্ডার
+    // Local storage & render
     function saveToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData)); updateStats(); }
     function rebuildFuse() { fuseInstance = new Fuse(peopleData, { keys: ['name','phone','area','role','cluster','note'], threshold: 0.3, includeMatches: true }); }
     function updateStats() { document.getElementById('totalCount').innerText = peopleData.length; document.getElementById('filteredCount').innerText = getFilteredData().length; }
@@ -180,7 +180,7 @@
         updateStats();
     }
 
-    // ফর্ম
+    // Form actions
     function toggleForm(show) { document.getElementById('formCard').classList.toggle('show', show); }
     function resetFormToAddMode() {
         document.getElementById('peopleForm').reset(); document.getElementById('editId').value = ''; document.getElementById('formTitle').innerHTML = '➕ নতুন সদস্য যোগ করুন'; document.getElementById('submitBtn').innerHTML = '➕ যোগ করুন'; document.getElementById('cancelEditBtn').style.display = 'none'; document.getElementById('phoneHint').innerHTML = '';
@@ -192,7 +192,7 @@
         toggleForm(true); window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // পাসওয়ার্ড
+    // Password protection
     function verifyPassword(action) { return prompt(`🔐 ${action} করতে পাসওয়ার্ড দিন:`) === ADMIN_PASSWORD; }
     async function deletePersonWithPassword(id) {
         if (!verifyPassword("ডিলিট")) { alert("ভুল পাসওয়ার্ড!"); return; }
@@ -222,7 +222,7 @@
         clusters.forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.text=c; clusterSel.appendChild(opt);});
     }
 
-    // ---------- শীট API কল (স্মার্ট ফ্যালব্যাক) ----------
+    // ---------- SHEETS API (CORS + JSONP fallback) ----------
     async function callSheetsAPI(action, payload = null) {
         const url = SHEETS_API_URL;
         const params = new URLSearchParams({ action });
@@ -238,10 +238,10 @@
 
     async function callSheetsAPISafe(action, payload = null) {
         if (payload) {
-            // POST - সরাসরি fetch (CORS হেডার লাগবে)
+            // POST - must use fetch (no JSONP for POST)
             return await callSheetsAPI(action, payload);
         } else {
-            // GET - fetch চেষ্টা, না হলে JSONP
+            // GET - try fetch, fallback to JSONP
             try {
                 return await callSheetsAPI(action);
             } catch (err) {
@@ -355,6 +355,7 @@
 
     async function initData() { const stored = localStorage.getItem(STORAGE_KEY); if(stored) peopleData = JSON.parse(stored); else loadDefaultData(); peopleData.sort((a,b)=>a.id-b.id); rebuildFuse(); populateFilters(); renderTable(); }
 
+    // Event listeners
     document.getElementById('toggleFormBtn').addEventListener('click', ()=>toggleForm(true));
     document.getElementById('peopleForm').addEventListener('submit', savePerson);
     document.getElementById('cancelEditBtn').addEventListener('click', ()=>{ resetFormToAddMode(); toggleForm(false); });
