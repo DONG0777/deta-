@@ -2,28 +2,53 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>প্রো CRM পিপল ম্যানেজার | টাস্ক ও ফলোআপ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>প্রো CRM পিপল ম্যানেজার | উন্নত সংস্করণ</title>
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Chart.js & jsPDF -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
+        /* মূল স্টাইল + ডার্ক মোড সাপোর্ট */
+        :root {
+            --bg-gradient: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
+            --card-bg: rgba(255,255,255,0.96);
+            --text-primary: #1a2c3e;
+            --text-secondary: #2c4c6e;
+            --border-light: #e2edf7;
+            --badge-bg: #f1f5f9;
+            --btn-outline-border: #cbd5e6;
+            --highlight-bg: #fef08a;
+        }
+        body.dark {
+            --bg-gradient: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e6;
+            --border-light: #334155;
+            --badge-bg: #334155;
+            --btn-outline-border: #475569;
+            --highlight-bg: #a16207;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-            background: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
             padding: 20px 16px 40px;
-            color: #1a2c3e;
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.2s;
         }
-
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
-
+        /* হেডার ও ডার্ক মোড টগল */
         .header {
             display: flex;
             justify-content: space-between;
@@ -35,10 +60,19 @@
         h1 {
             font-size: 1.7rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #0f2b3d, #1b4a6e);
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+        .theme-toggle {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         .lock-badge {
             background: #fef9c3;
@@ -46,66 +80,27 @@
             padding: 6px 14px;
             font-size: 0.7rem;
             font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            color: #1e293b;
         }
-
         .card {
-            background: rgba(255,255,255,0.96);
+            background: var(--card-bg);
             border-radius: 32px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15);
+            transition: background 0.3s;
         }
-
-        .form-card {
-            display: none;
-        }
-        .form-card.show {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin-bottom: 1.2rem;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        label {
-            font-weight: 700;
-            font-size: 0.75rem;
-            color: #2c4c6e;
-        }
+        /* ফর্ম, বাটন, টেবিল ইত্যাদি আগের মতো, শুধু ভেরিয়েবল ব্যবহার */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1rem; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-weight: 700; font-size: 0.75rem; color: var(--text-secondary); }
         input, select, textarea {
             padding: 12px 16px;
-            border: 1.5px solid #e2edf7;
+            border: 1.5px solid var(--border-light);
             border-radius: 28px;
-            font-size: 0.95rem;
-            background: white;
+            background: var(--card-bg);
+            color: var(--text-primary);
         }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
-        }
-        .phone-hint {
-            font-size: 0.7rem;
-            margin-top: 4px;
-        }
-        .valid { color: #10b981; }
-        .invalid { color: #ef4444; }
-
         .btn {
             padding: 10px 18px;
             border-radius: 40px;
@@ -113,256 +108,104 @@
             border: none;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
-        .btn-primary { background: linear-gradient(105deg, #2563eb, #1d4ed8); color: white; }
-        .btn-success { background: linear-gradient(105deg, #10b981, #059669); color: white; }
-        .btn-danger { background: linear-gradient(105deg, #ef4444, #dc2626); color: white; }
-        .btn-warning { background: linear-gradient(105deg, #f59e0b, #d97706); color: white; }
-        .btn-outline { background: transparent; border: 1.5px solid #cbd5e6; }
-        .btn-new { width: 100%; background: linear-gradient(105deg, #1e2f3f, #0f212f); color: white; padding: 14px; font-size: 1rem; margin-bottom: 8px; }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; justify-content: center; }
-        button:active { transform: scale(0.97); }
-
-        .search-box {
-            width: 100%;
-            padding: 12px 20px;
-            border-radius: 60px;
-            border: 1.5px solid #e2edf7;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-        }
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-        .filters select {
-            flex: 1;
-            min-width: 110px;
-        }
-
-        .view-toggle {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-bottom: 1rem;
-        }
-        .view-btn {
-            background: #eef2f8;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .view-btn.active {
-            background: #2563eb;
-            color: white;
-        }
-
-        /* গ্রিড ভিউ (কার্ড) */
-        .people-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .person-card {
-            background: white;
-            border-radius: 28px;
-            padding: 18px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            transition: 0.2s;
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .person-name {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #0f2b3d;
-        }
-        .person-phone {
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: #eef2ff;
-            padding: 4px 12px;
-            border-radius: 40px;
-        }
-        .detail-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 10px 0;
-        }
-        .detail-badge {
-            background: #f1f5f9;
-            padding: 4px 12px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-        }
-        .tasks-section, .call-logs-section {
-            margin-top: 12px;
-            background: #fafcff;
-            border-radius: 20px;
-            padding: 10px;
-        }
-        .task-item, .call-item {
-            background: white;
-            border-radius: 20px;
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            border-left: 4px solid #3b82f6;
-            font-size: 0.8rem;
-        }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--btn-outline-border); }
+        .btn-new { width: 100%; background: #1e2f3f; color: white; padding: 14px; margin-bottom: 8px; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 16px; }
+        .search-box { width: 100%; padding: 12px 20px; border-radius: 60px; border: 1.5px solid var(--border-light); background: var(--card-bg); margin-bottom: 1rem; }
+        .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; }
+        .view-toggle { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 1rem; }
+        .view-btn { background: var(--badge-bg); border: none; padding: 6px 16px; border-radius: 40px; cursor: pointer; }
+        .view-btn.active { background: #2563eb; color: white; }
+        /* গ্রিড ও লিস্ট ভিউ */
+        .people-grid { display: flex; flex-direction: column; gap: 16px; }
+        .person-card { background: var(--card-bg); border-radius: 28px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--border-light); }
+        .card-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; }
+        .person-name { font-size: 1.3rem; font-weight: 800; }
+        .detail-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+        .detail-badge { background: var(--badge-bg); padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; }
+        .tasks-section, .call-logs-section { margin-top: 12px; background: var(--badge-bg); border-radius: 20px; padding: 10px; }
+        .task-item, .call-item { background: var(--card-bg); border-radius: 20px; padding: 8px 12px; margin-bottom: 8px; border-left: 4px solid #3b82f6; }
         .task-done { border-left-color: #10b981; opacity: 0.7; text-decoration: line-through; }
-        .followup-required { background: #fee2e2; border-left-color: #ef4444; }
-        .card-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 12px;
-            border-top: 1px solid #eef2f8;
-            padding-top: 12px;
-        }
-        .icon-btn {
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 40px;
-        }
-        .icon-btn:hover { background: #f1f5f9; }
-
-        /* লিস্ট ভিউ (টেবিল) */
-        .list-view {
-            overflow-x: auto;
-            display: none;
-        }
-        .list-view.active {
-            display: block;
-        }
-        .grid-view {
-            display: block;
-        }
-        .grid-view.hide {
-            display: none;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 24px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 12px 8px;
-            text-align: left;
-            border-bottom: 1px solid #eef2f8;
-            font-size: 0.8rem;
-        }
-        th {
-            background: #f8fafc;
-        }
-
-        .stats-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 28px;
-            padding: 10px 16px;
-            flex: 1;
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #2563eb;
-        }
-
-        .highlight {
-            background-color: #fef08a;
-            border-radius: 6px;
-            padding: 0 2px;
-        }
-        @media (max-width: 550px) {
-            body { padding: 12px; }
-            .card { padding: 1rem; }
-            th, td { padding: 8px 4px; }
-        }
+        .followup-required { border-left-color: #ef4444; background: #fee2e2; color: #991b1b; }
+        .card-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; border-top: 1px solid var(--border-light); padding-top: 12px; }
+        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; padding: 4px 10px; border-radius: 40px; }
+        .list-view { overflow-x: auto; display: none; }
+        .list-view.active { display: block; }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 24px; }
+        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid var(--border-light); }
+        .stats-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-card { background: var(--card-bg); border-radius: 28px; padding: 10px 16px; flex: 1; text-align: center; }
+        .stat-number { font-size: 1.8rem; font-weight: 800; color: #2563eb; }
+        .chart-container { max-width: 400px; margin: 20px auto; }
+        .highlight { background-color: var(--highlight-bg); border-radius: 6px; padding: 0 2px; color: #0f172a; }
+        .toast { position: fixed; bottom: 20px; left: 20px; background: #1e293b; color: white; padding: 12px 20px; border-radius: 40px; z-index: 1000; animation: fadeOut 3s forwards; }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        @media (max-width: 680px) { .stats-row { flex-direction: column; } }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>👥 প্রো CRM পিপল ম্যানেজার</h1>
-        <div class="lock-badge">🔐 ডিলিট/রিসেটে পাসওয়ার্ড</div>
+        <h1>🚀 প্রো CRM পিপল ম্যানেজার</h1>
+        <div style="display: flex; gap: 12px;">
+            <button id="themeToggleBtn" class="theme-toggle">🌙 ডার্ক মোড</button>
+            <div class="lock-badge">🔐 পাসওয়ার্ড: admin123</div>
+        </div>
     </div>
 
     <button id="toggleFormBtn" class="btn btn-new">➕ নতুন সদস্য যোগ করুন</button>
 
-    <!-- ফর্ম -->
-    <div id="formCard" class="card form-card">
-        <h2 id="formTitle" style="margin-bottom: 1rem;">➕ নতুন সদস্য</h2>
+    <div id="formCard" class="card form-card" style="display:none;">
+        <h2 id="formTitle">➕ নতুন সদস্য</h2>
         <form id="peopleForm">
             <div class="form-grid">
                 <div class="form-group"><label>নাম *</label><input type="text" id="name" required></div>
-                <div class="form-group"><label>ফোন * (ভারতীয়)</label><input type="tel" id="phone" required><span id="phoneHint" class="phone-hint"></span></div>
+                <div class="form-group"><label>ফোন *</label><input type="tel" id="phone" required><span id="phoneHint" class="phone-hint"></span></div>
                 <div class="form-group"><label>এলাকা</label><input type="text" id="area"></div>
                 <div class="form-group"><label>রোল</label><input type="text" id="role"></div>
                 <div class="form-group"><label>ক্লাস্টার</label><input type="text" id="cluster"></div>
-                <div class="form-group"><label>নোট (সাধারণ)</label><textarea id="note" rows="2"></textarea></div>
+                <div class="form-group"><label>নোট</label><textarea id="note" rows="2"></textarea></div>
             </div>
-            <div class="btn-group"><button type="submit" class="btn btn-success" id="submitBtn">💾 সংরক্ষণ</button><button type="button" id="cancelEditBtn" class="btn btn-outline" style="display:none;">বাতিল</button></div>
-            <input type="hidden" id="editId" value="">
+            <div class="btn-group"><button type="submit" class="btn btn-success" id="submitBtn">💾 সংরক্ষণ</button><button type="button" id="cancelEditBtn" class="btn btn-outline">বাতিল</button></div>
+            <input type="hidden" id="editId">
         </form>
     </div>
 
-    <!-- প্রধান প্যানেল -->
-    <div class="card" style="padding: 1.2rem;">
-        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, এলাকা, টাস্ক...">
+    <div class="card">
+        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, টাস্ক দিয়ে খুঁজুন...">
         <div class="filters">
             <select id="filterRole"><option value="">সব রোল</option></select>
             <select id="filterArea"><option value="">সব এলাকা</option></select>
             <select id="filterCluster"><option value="">সব ক্লাস্টার</option></select>
             <select id="filterFollowup"><option value="">ফলোআপ প্রয়োজন</option><option value="yes">হ্যাঁ</option><option value="no">না</option></select>
         </div>
-
         <div class="view-toggle">
             <button class="view-btn active" data-view="grid">📱 কার্ড ভিউ</button>
             <button class="view-btn" data-view="list">📋 লিস্ট ভিউ</button>
         </div>
-
         <div class="stats-row">
             <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>মোট সদস্য</div></div>
             <div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>দেখানো হচ্ছে</div></div>
             <div class="stat-card"><div class="stat-number" id="followupCount">0</div><div>ফলোআপ প্রয়োজন</div></div>
         </div>
+        <div class="chart-container"><canvas id="statsChart"></canvas></div>
 
-        <div id="gridView" class="people-grid grid-view"></div>
-        <div id="listView" class="list-view">
-            <table>
-                <thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>টাস্ক</th><th>ফলোআপ</th><th></th></tr></thead>
-                <tbody id="listTableBody"></tbody>
-            </table>
-        </div>
+        <div id="gridView" class="people-grid"></div>
+        <div id="listView" class="list-view"><table><thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>টাস্ক বাকি</th><th>ফলোআপ</th><th></th></tr></thead><tbody id="listTableBody"></tbody></table></div>
 
-        <div class="btn-group" style="margin-top: 24px;">
+        <div class="btn-group">
             <button id="exportCsvBtn" class="btn btn-primary">📎 CSV (শীট)</button>
+            <button id="exportPdfBtn" class="btn btn-primary">📄 PDF রিপোর্ট</button>
             <button id="exportBtn" class="btn btn-warning">📁 JSON ব্যাকআপ</button>
-            <label for="importFile" class="btn btn-outline" style="cursor:pointer;">📂 JSON ইমপোর্ট</label>
+            <label for="importFile" class="btn btn-outline">📂 JSON ইমপোর্ট</label>
             <input type="file" id="importFile" accept=".json" style="display:none;">
             <button id="resetDataBtn" class="btn btn-danger">🔄 রিসেট</button>
         </div>
@@ -370,12 +213,12 @@
 </div>
 
 <script>
+    // ---------- কনফিগারেশন ----------
     const ADMIN_PASSWORD = "admin123";
-    const STORAGE_KEY = "crmPeopleData";
-
-    // ডেটা স্ট্রাকচার: প্রতিটি person এর মধ্যে tasks এবং callLogs অ্যারে থাকবে
+    const STORAGE_KEY = "crmPeopleDataPro";
     let peopleData = [];
     let fuseInstance = null;
+    let statsChart = null;
 
     // ফোন ফাংশন
     function cleanIndianPhone(phone) {
@@ -383,48 +226,30 @@
         if (cleaned.startsWith('+91')) cleaned = cleaned.slice(3);
         else if (cleaned.startsWith('91')) cleaned = cleaned.slice(2);
         if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
-        cleaned = cleaned.replace(/\D/g, '');
-        return cleaned;
+        return cleaned.replace(/\D/g, '');
     }
     function isValidIndianPhone(phone) { return /^[6-9]\d{9}$/.test(cleanIndianPhone(phone)); }
     function validatePhoneField() {
-        const inp = document.getElementById('phone');
-        const hint = document.getElementById('phoneHint');
+        const inp = document.getElementById('phone'), hint = document.getElementById('phoneHint');
         const raw = inp.value;
         if (!raw) { hint.innerHTML = ''; return false; }
         const valid = isValidIndianPhone(raw);
         hint.innerHTML = valid ? '✓ বৈধ' : '✗ 10 ডিজিট, 6/7/8/9 দিয়ে শুরু';
-        hint.className = valid ? 'phone-hint valid' : 'phone-hint invalid';
+        hint.style.color = valid ? '#10b981' : '#ef4444';
         return valid;
     }
     function isDuplicatePhone(phone, excludeId = null) {
         const cleaned = cleanIndianPhone(phone);
-        return peopleData.some(p => {
-            if (excludeId !== null && p.id == excludeId) return false;
-            return cleanIndianPhone(p.phone) === cleaned;
-        });
+        return peopleData.some(p => (excludeId === null || p.id != excludeId) && cleanIndianPhone(p.phone) === cleaned);
     }
 
-    // হেল্পার
-    function saveToStorage() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData));
-        updateStatsAndRender();
-    }
-    function rebuildFuse() {
-        fuseInstance = new Fuse(peopleData, {
-            keys: ['name', 'phone', 'area', 'role', 'cluster', 'note', 'tasks.title'],
-            threshold: 0.3,
-            includeMatches: true
-        });
-    }
-
+    // স্টোরেজ
+    function saveToStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData)); updateAll(); }
+    function rebuildFuse() { fuseInstance = new Fuse(peopleData, { keys: ['name','phone','area','role','cluster','note','tasks.title'], threshold: 0.3 }); }
     function getFilteredData() {
         let filtered = peopleData;
-        const query = document.getElementById('searchBox').value.trim();
-        if (query) {
-            const results = fuseInstance.search(query);
-            filtered = results.map(r => r.item);
-        }
+        const q = document.getElementById('searchBox').value.trim();
+        if (q) filtered = fuseInstance.search(q).map(r => r.item);
         const role = document.getElementById('filterRole').value;
         const area = document.getElementById('filterArea').value;
         const cluster = document.getElementById('filterCluster').value;
@@ -432,24 +257,24 @@
         if (role) filtered = filtered.filter(p => p.role === role);
         if (area) filtered = filtered.filter(p => p.area === area);
         if (cluster) filtered = filtered.filter(p => p.cluster === cluster);
-        if (followup === 'yes') filtered = filtered.filter(p => p.needFollowup === true);
+        if (followup === 'yes') filtered = filtered.filter(p => p.needFollowup);
         if (followup === 'no') filtered = filtered.filter(p => !p.needFollowup);
         return filtered;
     }
-
     function highlightText(text, query) {
         if (!query || !text) return text || '';
         const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return text.replace(regex, `<span class="highlight">$1</span>`);
     }
 
-    // টাস্ক ও কল লগ ম্যানেজমেন্ট
-    function addTask(personId, taskTitle, dueDate = '') {
+    // টাস্ক ও কল লগ
+    function addTask(personId, title, dueDate = '') {
         const person = peopleData.find(p => p.id == personId);
         if (!person) return;
         if (!person.tasks) person.tasks = [];
-        person.tasks.push({ id: Date.now(), title: taskTitle, done: false, dueDate: dueDate });
+        person.tasks.push({ id: Date.now(), title, done: false, dueDate });
         saveToStorage();
+        showToast("✅ টাস্ক যোগ হয়েছে");
     }
     function toggleTaskDone(personId, taskId) {
         const person = peopleData.find(p => p.id == personId);
@@ -458,194 +283,142 @@
     }
     function deleteTask(personId, taskId) {
         const person = peopleData.find(p => p.id == personId);
-        if (person && person.tasks) {
-            person.tasks = person.tasks.filter(t => t.id != taskId);
-            saveToStorage();
-        }
+        if (person && person.tasks) person.tasks = person.tasks.filter(t => t.id != taskId);
+        saveToStorage();
     }
     function addCallLog(personId, note, needFollowup) {
         const person = peopleData.find(p => p.id == personId);
         if (!person) return;
         if (!person.callLogs) person.callLogs = [];
-        person.callLogs.push({ date: new Date().toLocaleString(), note: note, followup: needFollowup });
+        person.callLogs.push({ date: new Date().toLocaleString(), note, followup: needFollowup });
         if (needFollowup) person.needFollowup = true;
         saveToStorage();
+        if (needFollowup) showToast(`📞 ${person.name} এর জন্য ফলোআপ প্রয়োজন`);
     }
     function clearFollowup(personId) {
         const person = peopleData.find(p => p.id == personId);
-        if (person) { person.needFollowup = false; saveToStorage(); }
+        if (person) person.needFollowup = false;
+        saveToStorage();
     }
 
-    // রেন্ডারিং (কার্ড ও লিস্ট)
-    let currentView = 'grid';
-    function render() {
-        if (currentView === 'grid') renderGrid();
-        else renderList();
-        updateStats();
+    // চার্ট আপডেট
+    function updateChart() {
+        const total = peopleData.length;
+        const tasksPending = peopleData.reduce((sum, p) => sum + (p.tasks?.filter(t => !t.done).length || 0), 0);
+        const tasksDone = peopleData.reduce((sum, p) => sum + (p.tasks?.filter(t => t.done).length || 0), 0);
+        const needFollowup = peopleData.filter(p => p.needFollowup).length;
+        if (statsChart) statsChart.destroy();
+        const ctx = document.getElementById('statsChart').getContext('2d');
+        statsChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: ['মোট সদস্য', 'বাকি টাস্ক', 'সমাপ্ত টাস্ক', 'ফলোআপ প্রয়োজন'], datasets: [{ label: 'পরিমাণ', data: [total, tasksPending, tasksDone, needFollowup], backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444'] }] }
+        });
     }
+
+    // রেন্ডার
+    let currentView = 'grid';
+    function render() { currentView === 'grid' ? renderGrid() : renderList(); updateStats(); updateChart(); }
     function updateStats() {
         const filtered = getFilteredData();
         document.getElementById('filteredCount').innerText = filtered.length;
         document.getElementById('totalCount').innerText = peopleData.length;
-        const followupNeeded = peopleData.filter(p => p.needFollowup === true).length;
-        document.getElementById('followupCount').innerText = followupNeeded;
+        document.getElementById('followupCount').innerText = peopleData.filter(p => p.needFollowup).length;
     }
-
     function renderGrid() {
         const filtered = getFilteredData();
         const grid = document.getElementById('gridView');
         grid.innerHTML = '';
-        const query = document.getElementById('searchBox').value.trim();
-        if (filtered.length === 0) {
-            grid.innerHTML = '<div style="text-align:center; padding:40px;">😞 কোনো সদস্য নেই</div>';
-            return;
-        }
-        filtered.forEach(person => {
+        const q = document.getElementById('searchBox').value.trim();
+        filtered.forEach(p => {
             const card = document.createElement('div');
             card.className = 'person-card';
-            const nameHtml = highlightText(person.name || '', query);
-            const phoneHtml = highlightText(person.phone || '', query);
-            const areaHtml = highlightText(person.area || '', query);
-            const roleHtml = highlightText(person.role || '', query);
-            const clusterHtml = highlightText(person.cluster || '', query);
-            // টাস্ক লিস্ট
+            const nameHtml = highlightText(p.name, q);
+            const phoneHtml = highlightText(p.phone, q);
             let tasksHtml = '';
-            if (person.tasks && person.tasks.length) {
+            if (p.tasks?.length) {
                 tasksHtml = `<div class="tasks-section"><strong>📋 টাস্ক:</strong>`;
-                person.tasks.forEach(t => {
+                p.tasks.forEach(t => {
                     tasksHtml += `<div class="task-item ${t.done ? 'task-done' : ''}">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskDone(${person.id}, ${t.id})">
-                        <span>${highlightText(t.title, query)}</span> ${t.dueDate ? `(শেষ তারিখ: ${t.dueDate})` : ''}
-                        <button class="icon-btn" style="float:right;" onclick="deleteTask(${person.id}, ${t.id})">🗑️</button>
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTaskDone(${p.id}, ${t.id})">
+                        <span>${highlightText(t.title, q)}</span> ${t.dueDate ? `(📅 ${t.dueDate})` : ''}
+                        <button class="icon-btn" style="float:right;" onclick="deleteTask(${p.id}, ${t.id})">🗑️</button>
                     </div>`;
                 });
                 tasksHtml += `</div>`;
             }
-            // কল লগ
             let callHtml = '';
-            if (person.callLogs && person.callLogs.length) {
+            if (p.callLogs?.length) {
                 callHtml = `<div class="call-logs-section"><strong>📞 কল লগ:</strong>`;
-                person.callLogs.slice(-3).forEach(c => {
-                    callHtml += `<div class="call-item ${c.followup ? 'followup-required' : ''}">
-                        📅 ${c.date} - ${c.note} ${c.followup ? '⚠️ ফলোআপ দরকার' : ''}
-                    </div>`;
+                p.callLogs.slice(-3).forEach(c => {
+                    callHtml += `<div class="call-item ${c.followup ? 'followup-required' : ''}">📅 ${c.date} - ${c.note} ${c.followup ? '⚠️ ফলোআপ দরকার' : ''}</div>`;
                 });
                 callHtml += `</div>`;
             }
             card.innerHTML = `
-                <div class="card-header">
-                    <div class="person-name">${nameHtml}</div>
-                    <div class="person-phone">📞 ${phoneHtml}</div>
-                </div>
+                <div class="card-header"><div class="person-name">${nameHtml}</div><div class="person-phone">📞 ${phoneHtml}</div></div>
                 <div class="detail-row">
-                    ${person.area ? `<span class="detail-badge">📍 ${areaHtml}</span>` : ''}
-                    ${person.role ? `<span class="detail-badge">👤 ${roleHtml}</span>` : ''}
-                    ${person.cluster ? `<span class="detail-badge">🔘 ${clusterHtml}</span>` : ''}
-                    ${person.needFollowup ? `<span class="detail-badge" style="background:#fee2e2;">⚠️ ফলোআপ দরকার</span>` : ''}
+                    ${p.area ? `<span class="detail-badge">📍 ${highlightText(p.area, q)}</span>` : ''}
+                    ${p.role ? `<span class="detail-badge">👤 ${highlightText(p.role, q)}</span>` : ''}
+                    ${p.cluster ? `<span class="detail-badge">🔘 ${highlightText(p.cluster, q)}</span>` : ''}
+                    ${p.needFollowup ? `<span class="detail-badge" style="background:#fee2e2;">⚠️ ফলোআপ দরকার</span>` : ''}
                 </div>
-                ${tasksHtml}
-                ${callHtml}
+                ${tasksHtml} ${callHtml}
                 <div class="card-actions">
-                    <button class="icon-btn" onclick="quickAddTask(${person.id})">➕ টাস্ক</button>
-                    <button class="icon-btn" onclick="quickCallLog(${person.id})">📞 কল লগ</button>
-                    <button class="icon-btn edit-person" data-id="${person.id}">✏️ এডিট</button>
-                    <button class="icon-btn delete-person" data-id="${person.id}">🗑️ ডিলিট</button>
+                    <button class="icon-btn" onclick="quickAddTask(${p.id})">➕ টাস্ক</button>
+                    <button class="icon-btn" onclick="quickCallLog(${p.id})">📞 কল লগ</button>
+                    <button class="icon-btn edit-person" data-id="${p.id}">✏️ এডিট</button>
+                    <button class="icon-btn delete-person" data-id="${p.id}">🗑️ ডিলিট</button>
                 </div>
             `;
             grid.appendChild(card);
         });
         attachCardEvents();
     }
-
     function renderList() {
         const filtered = getFilteredData();
         const tbody = document.getElementById('listTableBody');
         tbody.innerHTML = '';
-        const query = document.getElementById('searchBox').value.trim();
+        const q = document.getElementById('searchBox').value.trim();
         filtered.forEach(p => {
             const row = tbody.insertRow();
-            row.insertCell(0).innerHTML = highlightText(p.name, query);
-            row.insertCell(1).innerHTML = highlightText(p.phone, query);
-            row.insertCell(2).innerHTML = highlightText(p.area || '', query);
-            row.insertCell(3).innerHTML = highlightText(p.role || '', query);
-            const taskCount = p.tasks ? p.tasks.filter(t => !t.done).length : 0;
-            row.insertCell(4).innerHTML = `${taskCount}টি বাকি`;
+            row.insertCell(0).innerHTML = highlightText(p.name, q);
+            row.insertCell(1).innerHTML = highlightText(p.phone, q);
+            row.insertCell(2).innerHTML = highlightText(p.area || '', q);
+            row.insertCell(3).innerHTML = highlightText(p.role || '', q);
+            const pending = p.tasks?.filter(t => !t.done).length || 0;
+            row.insertCell(4).innerHTML = `${pending}`;
             row.insertCell(5).innerHTML = p.needFollowup ? 'হ্যাঁ' : 'না';
-            const actionCell = row.insertCell(6);
-            actionCell.innerHTML = `<button class="icon-btn" onclick="quickEdit(${p.id})">✏️</button> <button class="icon-btn" onclick="quickDelete(${p.id})">🗑️</button>`;
+            const act = row.insertCell(6);
+            act.innerHTML = `<button class="icon-btn" onclick="quickEdit(${p.id})">✏️</button> <button class="icon-btn" onclick="quickDelete(${p.id})">🗑️</button>`;
         });
     }
-
     function attachCardEvents() {
-        document.querySelectorAll('.edit-person').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = parseInt(btn.dataset.id);
-                const person = peopleData.find(p => p.id === id);
-                if (person) loadPersonToForm(person);
-            });
-        });
-        document.querySelectorAll('.delete-person').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = parseInt(btn.dataset.id);
-                deletePersonWithPassword(id);
-            });
-        });
+        document.querySelectorAll('.edit-person').forEach(btn => btn.addEventListener('click', (e) => loadPersonToForm(peopleData.find(p => p.id == btn.dataset.id))));
+        document.querySelectorAll('.delete-person').forEach(btn => btn.addEventListener('click', (e) => deletePersonWithPassword(parseInt(btn.dataset.id))));
     }
-
-    // গ্লোবাল ফাংশন (HTML থেকে কল করা হবে)
-    window.quickAddTask = (personId) => {
-        const title = prompt("টাস্কের বিবরণ লিখুন:");
-        if (title) addTask(personId, title);
-    };
-    window.quickCallLog = (personId) => {
-        const note = prompt("কলের নোট (কী কথা হলো?):");
-        if (note) {
-            const needFollowup = confirm("ফলোআপ প্রয়োজন?");
-            addCallLog(personId, note, needFollowup);
-        }
-    };
+    window.quickAddTask = (id) => { const title = prompt("টাস্ক লিখুন:"); if(title) addTask(id, title); };
+    window.quickCallLog = (id) => { const note = prompt("কলের নোট:"); if(note) addCallLog(id, note, confirm("ফলোআপ প্রয়োজন?")); };
     window.toggleTaskDone = toggleTaskDone;
     window.deleteTask = deleteTask;
-    window.quickEdit = (id) => {
-        const person = peopleData.find(p => p.id === id);
-        if (person) loadPersonToForm(person);
-    };
+    window.quickEdit = (id) => loadPersonToForm(peopleData.find(p => p.id == id));
     window.quickDelete = (id) => deletePersonWithPassword(id);
 
     function deletePersonWithPassword(id) {
-        const pwd = prompt("ডিলিট করতে পাসওয়ার্ড দিন:");
-        if (pwd !== ADMIN_PASSWORD) { alert("ভুল পাসওয়ার্ড"); return; }
-        if (confirm("নিশ্চিত ডিলিট?")) {
-            peopleData = peopleData.filter(p => p.id !== id);
-            saveToStorage();
-            if (document.getElementById('editId').value == id) resetFormToAddMode();
-            alert("ডিলিট হয়েছে");
-        }
+        if (prompt("পাসওয়ার্ড:") !== ADMIN_PASSWORD) return alert("ভুল পাসওয়ার্ড");
+        if (confirm("ডিলিট?")) { peopleData = peopleData.filter(p => p.id !== id); saveToStorage(); if(document.getElementById('editId').value == id) resetFormToAddMode(); alert("ডিলিট হয়েছে"); }
     }
     function resetDataWithPassword() {
-        const pwd = prompt("রিসেট করতে পাসওয়ার্ড দিন:");
-        if (pwd !== ADMIN_PASSWORD) { alert("ভুল"); return; }
-        if (confirm("সব ডেটা মুছে ডিফল্ট লোড হবে?")) {
-            loadDefaultData();
-            saveToStorage();
-            resetFormToAddMode();
-            toggleForm(false);
-        }
+        if (prompt("পাসওয়ার্ড:") !== ADMIN_PASSWORD) return alert("ভুল");
+        if (confirm("ডিফল্ট ডেটা লোড হবে?")) { loadDefaultData(); saveToStorage(); resetFormToAddMode(); toggleForm(false); }
     }
 
     // ফর্ম
-    function toggleForm(show) {
-        const fc = document.getElementById('formCard');
-        if (show === true) fc.classList.add('show');
-        else fc.classList.remove('show');
-    }
+    function toggleForm(show) { document.getElementById('formCard').style.display = show ? 'block' : 'none'; }
     function resetFormToAddMode() {
-        document.getElementById('peopleForm').reset();
-        document.getElementById('editId').value = '';
-        document.getElementById('formTitle').innerHTML = '➕ নতুন সদস্য';
+        document.getElementById('peopleForm').reset(); document.getElementById('editId').value = '';
+        document.getElementById('formTitle').innerText = '➕ নতুন সদস্য';
         document.getElementById('submitBtn').innerHTML = '➕ যোগ করুন';
         document.getElementById('cancelEditBtn').style.display = 'none';
-        document.getElementById('phoneHint').innerHTML = '';
     }
     function loadPersonToForm(p) {
         document.getElementById('name').value = p.name;
@@ -656,7 +429,7 @@
         document.getElementById('cluster').value = p.cluster || '';
         document.getElementById('note').value = p.note || '';
         document.getElementById('editId').value = p.id;
-        document.getElementById('formTitle').innerHTML = '✏️ সদস্য এডিট';
+        document.getElementById('formTitle').innerText = '✏️ সদস্য এডিট';
         document.getElementById('submitBtn').innerHTML = '💾 আপডেট';
         document.getElementById('cancelEditBtn').style.display = 'inline-block';
         toggleForm(true);
@@ -666,17 +439,13 @@
         e.preventDefault();
         const name = document.getElementById('name').value.trim();
         let rawPhone = document.getElementById('phone').value.trim();
-        if (!name) return alert('নাম দিন');
-        if (!rawPhone) return alert('ফোন দিন');
-        if (!isValidIndianPhone(rawPhone)) return alert('ভারতীয় মোবাইল দিন');
+        if (!name || !rawPhone) return alert("নাম ও ফোন দিন");
+        if (!isValidIndianPhone(rawPhone)) return alert("ভারতীয় ফোন দিন");
         const editId = document.getElementById('editId').value;
         const cleanedPhone = cleanIndianPhone(rawPhone);
-        let isEditingSamePhone = false;
-        if (editId) {
-            const curr = peopleData.find(p => p.id == editId);
-            if (curr && cleanIndianPhone(curr.phone) === cleanedPhone) isEditingSamePhone = true;
-        }
-        if (!isEditingSamePhone && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) return alert('এই ফোন আগে থেকেই আছে!');
+        let isEditingSame = false;
+        if (editId) { const curr = peopleData.find(p => p.id == editId); if (curr && cleanIndianPhone(curr.phone) === cleanedPhone) isEditingSame = true; }
+        if (!isEditingSame && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) return alert("ফোন নম্বর ডুপ্লিকেট!");
         const area = document.getElementById('area').value.trim();
         const role = document.getElementById('role').value.trim();
         const cluster = document.getElementById('cluster').value.trim();
@@ -686,9 +455,7 @@
             peopleData.push({ id: newId, name, phone: cleanedPhone, area, role, cluster, note, tasks: [], callLogs: [], needFollowup: false });
         } else {
             const idx = peopleData.findIndex(p => p.id == editId);
-            if (idx !== -1) {
-                peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
-            }
+            if (idx !== -1) peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
             resetFormToAddMode();
         }
         saveToStorage();
@@ -696,103 +463,55 @@
         toggleForm(false);
     }
 
-    // এক্সপোর্ট/ইমপোর্ট (CSV)
+    // এক্সপোর্ট
     function exportToCSV() {
-        if (!peopleData.length) return alert("কোন ডেটা নেই");
         const headers = ["ID","নাম","ফোন","এলাকা","রোল","ক্লাস্টার","নোট","টাস্ক","কল লগ","ফলোআপ প্রয়োজন"];
         const rows = peopleData.map(p => [
             p.id, `"${p.name}"`, p.phone, `"${p.area||''}"`, `"${p.role||''}"`, `"${p.cluster||''}"`, `"${p.note||''}"`,
-            `"${(p.tasks||[]).map(t=>t.title+(t.done?'(done)':'')).join('; ')}"`,
+            `"${(p.tasks||[]).map(t=>t.title+(t.done?'✓':'')).join('; ')}"`,
             `"${(p.callLogs||[]).map(c=>c.date+':'+c.note).join('; ')}"`,
             p.needFollowup ? "হ্যাঁ" : "না"
         ]);
         const csv = [headers, ...rows].map(row=>row.join(",")).join("\n");
         const blob = new Blob(["\uFEFF"+csv], {type:"text/csv"});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `crm_${new Date().toISOString().slice(0,10)}.csv`;
-        a.click();
-        URL.revokeObjectURL(a.href);
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `crm_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(a.href);
     }
-    function exportToJSON() {
-        const dataStr = JSON.stringify(peopleData, null, 2);
-        const blob = new Blob([dataStr], {type:'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `crm_backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
+    async function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("CRM রিপোর্ট", 20, 10);
+        let y = 20;
+        peopleData.forEach(p => {
+            doc.text(`${p.name} (${p.phone})`, 20, y); y+=8;
+            doc.text(`টাস্ক: ${(p.tasks||[]).map(t=>t.title).join(', ')}`, 20, y); y+=6;
+            doc.text(`ফলোআপ: ${p.needFollowup ? 'হ্যাঁ' : 'না'}`, 20, y); y+=10;
+            if(y > 280) { doc.addPage(); y=20; }
+        });
+        doc.save(`report_${new Date().toISOString().slice(0,10)}.pdf`);
     }
-    function importFromJSON(file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-            try {
-                const imported = JSON.parse(ev.target.result);
-                if (Array.isArray(imported)) {
-                    peopleData = imported.map((p,idx) => ({ ...p, id: p.id || idx+1, tasks: p.tasks || [], callLogs: p.callLogs || [] }));
-                    saveToStorage();
-                    alert("ইমপোর্ট সফল");
-                } else throw new Error();
-            } catch(e) { alert("ভুল JSON ফাইল"); }
-        };
-        reader.readAsText(file);
-    }
-    function loadDefaultData() {
-        peopleData = [
-            { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়", tasks:[], callLogs:[], needFollowup:false },
-            { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন", tasks:[{id:101, title:"রিপোর্ট জমা দিন", done:false, dueDate:"2026-04-15"}], callLogs:[{date:"2026-04-10", note:"ফোনে কথা হলো", followup:true}], needFollowup:true }
-        ];
-    }
+    function exportToJSON() { const dataStr = JSON.stringify(peopleData, null, 2); const blob = new Blob([dataStr], {type:'application/json'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `crm_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); }
+    function importFromJSON(file) { const reader = new FileReader(); reader.onload = ev => { try { const imported = JSON.parse(ev.target.result); if (Array.isArray(imported)) { peopleData = imported.map(p => ({ ...p, tasks: p.tasks||[], callLogs: p.callLogs||[] })); saveToStorage(); alert("ইমপোর্ট সফল"); } else throw new Error(); } catch(e) { alert("ভুল ফাইল"); } }; reader.readAsText(file); }
+    function loadDefaultData() { peopleData = [ { id:1, name:"রাহুল শর্মা", phone:"9876543210", area:"দিল্লি", role:"সদস্য", cluster:"উত্তর", note:"সক্রিয়", tasks:[], callLogs:[], needFollowup:false }, { id:2, name:"প্রিয়া সিং", phone:"9988776655", area:"মুম্বই", role:"নেত্রী", cluster:"পশ্চিম", note:"নতুন", tasks:[{id:101, title:"রিপোর্ট জমা দিন", done:false, dueDate:"2026-04-15"}], callLogs:[{date:"2026-04-10", note:"ফোনে কথা হলো", followup:true}], needFollowup:true } ]; }
 
     function populateFilters() {
         const roles = [...new Set(peopleData.map(p=>p.role).filter(r=>r))];
         const areas = [...new Set(peopleData.map(p=>p.area).filter(a=>a))];
         const clusters = [...new Set(peopleData.map(p=>p.cluster).filter(c=>c))];
-        const roleSel = document.getElementById('filterRole');
-        const areaSel = document.getElementById('filterArea');
-        const clusterSel = document.getElementById('filterCluster');
-        roleSel.innerHTML = '<option value="">সব রোল</option>';
-        areaSel.innerHTML = '<option value="">সব এলাকা</option>';
-        clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
+        const roleSel = document.getElementById('filterRole'), areaSel = document.getElementById('filterArea'), clusterSel = document.getElementById('filterCluster');
+        roleSel.innerHTML = '<option value="">সব রোল</option>'; areaSel.innerHTML = '<option value="">সব এলাকা</option>'; clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
         roles.forEach(r=>{let opt=document.createElement('option'); opt.value=r; opt.text=r; roleSel.appendChild(opt);});
         areas.forEach(a=>{let opt=document.createElement('option'); opt.value=a; opt.text=a; areaSel.appendChild(opt);});
         clusters.forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.text=c; clusterSel.appendChild(opt);});
     }
+    function updateAll() { rebuildFuse(); populateFilters(); render(); }
+    function showToast(msg) { const toast = document.createElement('div'); toast.className = 'toast'; toast.innerText = msg; document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000); }
 
-    function updateStatsAndRender() {
-        rebuildFuse();
-        populateFilters();
-        render();
-    }
+    // ডার্ক মোড
+    const themeBtn = document.getElementById('themeToggleBtn');
+    themeBtn.addEventListener('click', () => { document.body.classList.toggle('dark'); themeBtn.innerText = document.body.classList.contains('dark') ? '☀️ লাইট মোড' : '🌙 ডার্ক মোড'; localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light'); });
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
-    function initData() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) peopleData = JSON.parse(stored);
-        else loadDefaultData();
-        peopleData.forEach(p => { if (!p.tasks) p.tasks = []; if (!p.callLogs) p.callLogs = []; });
-        updateStatsAndRender();
-    }
-
-    // ভিউ টগল
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentView = btn.dataset.view;
-            if (currentView === 'grid') {
-                document.getElementById('gridView').classList.remove('hide');
-                document.getElementById('listView').classList.remove('active');
-                document.getElementById('gridView').style.display = 'block';
-                document.getElementById('listView').style.display = 'none';
-            } else {
-                document.getElementById('gridView').style.display = 'none';
-                document.getElementById('listView').style.display = 'block';
-                document.getElementById('listView').classList.add('active');
-            }
-            render();
-        });
-    });
-
+    // ইভেন্ট লিসেনার
     document.getElementById('toggleFormBtn').addEventListener('click', () => toggleForm(true));
     document.getElementById('peopleForm').addEventListener('submit', savePerson);
     document.getElementById('cancelEditBtn').addEventListener('click', () => { resetFormToAddMode(); toggleForm(false); });
@@ -802,11 +521,25 @@
     document.getElementById('filterCluster').addEventListener('change', () => render());
     document.getElementById('filterFollowup').addEventListener('change', () => render());
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
+    document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
     document.getElementById('exportBtn').addEventListener('click', exportToJSON);
     document.getElementById('importFile').addEventListener('change', (e) => { if(e.target.files.length) importFromJSON(e.target.files[0]); e.target.value=''; });
     document.getElementById('resetDataBtn').addEventListener('click', resetDataWithPassword);
     document.getElementById('phone').addEventListener('input', validatePhoneField);
+    document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        document.getElementById('gridView').style.display = currentView === 'grid' ? 'block' : 'none';
+        document.getElementById('listView').classList.toggle('active', currentView === 'list');
+        render();
+    }));
     initData();
+    function initData() { const stored = localStorage.getItem(STORAGE_KEY); if(stored) peopleData = JSON.parse(stored); else loadDefaultData(); peopleData.forEach(p => { if (!p.tasks) p.tasks = []; if (!p.callLogs) p.callLogs = []; }); updateAll(); }
+    // স্বয়ংক্রিয় ব্যাকআপ রিমাইন্ডার (সপ্তাহে একবার)
+    const lastBackup = localStorage.getItem('lastBackupReminder');
+    const now = Date.now();
+    if (!lastBackup || now - parseInt(lastBackup) > 7*86400000) { setTimeout(() => showToast("📦 সাপ্তাহিক ব্যাকআপ নিন! 'JSON ব্যাকআপ' বাটনে ক্লিক করুন।"), 5000); localStorage.setItem('lastBackupReminder', now); }
 </script>
 </body>
 </html>
