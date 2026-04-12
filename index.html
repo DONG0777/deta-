@@ -3,99 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>প্রো পিপল ম্যানেজার</title>
+    <title>প্রো পিপল ম্যানেজার | প্রফেশনাল CRM</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: linear-gradient(145deg, #eef2f7 0%, #d9e2ec 100%);
-            padding: 20px 16px 40px;
-            color: #1a2c3e;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container { max-width: 1000px; margin: 0 auto; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+            padding: 24px 20px 48px;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        /* হেডার */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e293b, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .password-hint {
+            background: #fef9c3;
+            padding: 6px 14px;
+            border-radius: 60px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #854d0e;
+        }
+        /* কার্ড */
         .card {
-            background: rgba(255,255,255,0.96);
-            border-radius: 32px;
+            background: white;
+            border-radius: 28px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.02);
+            transition: all 0.2s;
         }
-        .form-card { display: none; }
-        .form-card.show { display: block; }
+        .form-card {
+            display: none;
+            border: 1px solid #e2e8f0;
+        }
+        .form-card.show {
+            display: block;
+            animation: slideDown 0.25s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* ফর্ম */
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
         }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        label { font-weight: 700; font-size: 0.75rem; color: #2c4c6e; }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        label {
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         input, select, textarea {
             padding: 12px 16px;
-            border: 1.5px solid #e2edf7;
-            border-radius: 28px;
-            font-size: 0.95rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.9rem;
             background: white;
+            transition: 0.2s;
         }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        /* বাটন */
         .btn {
-            padding: 10px 18px;
+            padding: 10px 20px;
             border-radius: 40px;
-            font-weight: 700;
+            font-weight: 600;
             border: none;
             cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
-        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary { background: #3b82f6; color: white; box-shadow: 0 2px 6px rgba(59,130,246,0.3); }
         .btn-success { background: #10b981; color: white; }
         .btn-danger { background: #ef4444; color: white; }
         .btn-warning { background: #f59e0b; color: white; }
-        .btn-outline { background: transparent; border: 1.5px solid #cbd5e6; }
-        .btn-new { width: 100%; background: #1e2f3f; color: white; padding: 14px; margin-bottom: 8px; }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; justify-content: center; }
+        .btn-outline { background: transparent; border: 1.5px solid #cbd5e1; color: #475569; }
+        .btn-new {
+            width: 100%;
+            background: #1e293b;
+            color: white;
+            padding: 14px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        button:active { transform: scale(0.97); }
+        /* সার্চ ও ফিল্টার */
         .search-box {
             width: 100%;
-            padding: 12px 20px;
+            padding: 14px 20px;
             border-radius: 60px;
-            border: 1.5px solid #e2edf7;
-            margin-bottom: 1rem;
+            border: 1.5px solid #e2e8f0;
+            font-size: 0.95rem;
+            background: white;
+            margin-bottom: 1.2rem;
         }
-        .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; }
-        .filters select { flex: 1; min-width: 110px; padding: 10px; border-radius: 40px; }
-        .view-toggle { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 1rem; }
-        .view-btn { background: #eef2f8; border: none; padding: 6px 16px; border-radius: 40px; cursor: pointer; }
-        .view-btn.active { background: #2563eb; color: white; }
-        .people-grid { display: flex; flex-direction: column; gap: 16px; }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .filters select {
+            flex: 1;
+            min-width: 120px;
+            background: white;
+            padding: 10px 14px;
+            border-radius: 40px;
+        }
+        /* ভিউ টগল */
+        .view-toggle {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 1.2rem;
+        }
+        .view-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .view-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+        /* গ্রিড ভিউ (কার্ড) */
+        .people-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
         .person-card {
             background: white;
-            border-radius: 28px;
-            padding: 18px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             border: 1px solid #eef2f8;
+            transition: 0.2s;
         }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 12px; }
-        .person-name { font-size: 1.3rem; font-weight: 800; color: #0f2b3d; }
-        .person-phone { font-size: 0.85rem; background: #eef2ff; padding: 4px 12px; border-radius: 40px; }
-        .detail-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
-        .detail-badge { background: #f1f5f9; padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; }
-        .note-text { background: #fefce8; padding: 8px 12px; border-radius: 20px; margin-top: 8px; font-size: 0.8rem; color: #5b4e1e; }
-        .card-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; border-top: 1px solid #eef2f8; padding-top: 12px; }
-        .icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 6px 10px; border-radius: 40px; }
-        .icon-btn:hover { background: #f1f5f9; }
-        .kebab-wrapper { position: relative; display: inline-block; }
+        .person-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .person-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .person-phone {
+            font-size: 0.8rem;
+            background: #eef2ff;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #2563eb;
+        }
+        .detail-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .detail-badge {
+            background: #f8fafc;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+        .note-text {
+            background: #fffbeb;
+            padding: 10px 14px;
+            border-radius: 18px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #92400e;
+            border-left: 3px solid #f59e0b;
+        }
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 14px;
+            border-top: 1px solid #eef2f8;
+            padding-top: 14px;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-weight: 500;
+            transition: 0.1s;
+        }
+        .icon-btn:hover {
+            background: #f1f5f9;
+        }
+        /* কেবা মেনু */
+        .kebab-wrapper {
+            position: relative;
+            display: inline-block;
+        }
         .kebab-menu {
             position: absolute;
             bottom: 100%;
             right: 0;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
             display: none;
             z-index: 100;
-            min-width: 120px;
+            min-width: 130px;
             overflow: hidden;
+            border: 1px solid #e2e8f0;
         }
         .kebab-menu button {
             display: block;
@@ -107,75 +287,158 @@
             font-size: 0.85rem;
             cursor: pointer;
         }
-        .kebab-menu button:hover { background: #f1f5f9; }
-        .list-view { overflow-x: auto; display: none; }
-        .list-view.active { display: block; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 24px; }
-        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #eef2f8; font-size: 0.85rem; }
-        th { background: #f8fafc; }
-        .stats-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .stat-card { background: white; border-radius: 28px; padding: 10px 16px; flex: 1; text-align: center; }
-        .stat-number { font-size: 1.8rem; font-weight: 800; color: #2563eb; }
+        .kebab-menu button:hover {
+            background: #f1f5f9;
+        }
+        /* লিস্ট ভিউ */
+        .list-view {
+            overflow-x: auto;
+            display: none;
+        }
+        .list-view.active {
+            display: block;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 14px 10px;
+            text-align: left;
+            border-bottom: 1px solid #eef2f8;
+            font-size: 0.85rem;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        /* স্ট্যাটাস */
+        .stats-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 24px;
+            padding: 12px 20px;
+            flex: 1;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #3b82f6;
+        }
         .toast {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
+            bottom: 24px;
+            left: 24px;
             background: #1e293b;
             color: white;
-            padding: 10px 18px;
-            border-radius: 40px;
+            padding: 12px 20px;
+            border-radius: 48px;
             animation: fadeOut 3s forwards;
             z-index: 1000;
+            font-size: 0.85rem;
         }
-        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
-        @media (max-width: 550px) { body { padding: 12px; } .card { padding: 1rem; } }
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0); }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; transform: translateY(10px); }
+        }
+        @media (max-width: 640px) {
+            body { padding: 16px; }
+            .card { padding: 1.2rem; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="app-header">
         <h1>👥 প্রো পিপল ম্যানেজার</h1>
-        <div style="background: #fef9c3; padding: 4px 12px; border-radius: 40px; font-size: 0.7rem;">🔐 পাসওয়ার্ড: admin123</div>
+        <div class="password-hint">🔐 পাসওয়ার্ড: admin123</div>
     </div>
 
     <button id="toggleFormBtn" class="btn btn-new">➕ নতুন সদস্য যোগ করুন</button>
 
     <div id="formCard" class="card form-card">
-        <h2 id="formTitle" style="margin-bottom: 1rem;">➕ নতুন সদস্য</h2>
+        <h2 id="formTitle" style="margin-bottom: 1.2rem; font-weight: 700;">➕ নতুন সদস্য</h2>
         <form id="peopleForm">
             <div class="form-grid">
-                <div class="form-group"><label>নাম *</label><input type="text" id="name" required></div>
-                <div class="form-group"><label>ফোন *</label><input type="tel" id="phone" required><span id="phoneHint" style="font-size:0.7rem;"></span></div>
-                <div class="form-group"><label>এলাকা</label><input type="text" id="area"></div>
-                <div class="form-group"><label>রোল</label><input type="text" id="role"></div>
-                <div class="form-group"><label>ক্লাস্টার</label><input type="text" id="cluster"></div>
-                <div class="form-group"><label>নোট</label><textarea id="note" rows="2"></textarea></div>
+                <div class="form-group">
+                    <label>নাম *</label>
+                    <input type="text" id="name" required placeholder="পূর্ণ নাম">
+                </div>
+                <div class="form-group">
+                    <label>ফোন * (ভারতীয়)</label>
+                    <input type="tel" id="phone" required placeholder="10 ডিজিট">
+                    <span id="phoneHint" style="font-size:0.7rem;"></span>
+                </div>
+                <div class="form-group">
+                    <label>এলাকা</label>
+                    <input type="text" id="area" placeholder="জেলা/শহর">
+                </div>
+                <div class="form-group">
+                    <label>রোল</label>
+                    <input type="text" id="role" placeholder="সদস্য/নেত্রী/ভলান্টিয়ার">
+                </div>
+                <div class="form-group">
+                    <label>ক্লাস্টার</label>
+                    <input type="text" id="cluster" placeholder="উত্তর/দক্ষিণ/পূর্ব/পশ্চিম">
+                </div>
+                <div class="form-group">
+                    <label>নোট</label>
+                    <textarea id="note" rows="2" placeholder="বিশেষ তথ্য..."></textarea>
+                </div>
             </div>
-            <div class="btn-group"><button type="submit" class="btn btn-success" id="submitBtn">💾 সংরক্ষণ</button><button type="button" id="cancelEditBtn" class="btn btn-outline" style="display:none;">বাতিল</button></div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success" id="submitBtn">💾 সংরক্ষণ করুন</button>
+                <button type="button" id="cancelEditBtn" class="btn btn-outline" style="display:none;">বাতিল করুন</button>
+            </div>
             <input type="hidden" id="editId">
         </form>
     </div>
 
     <div class="card">
-        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, এলাকা, নোট...">
+        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, এলাকা, নোট দিয়ে খুঁজুন...">
+        
         <div class="filters">
             <select id="filterRole"><option value="">সব রোল</option></select>
             <select id="filterArea"><option value="">সব এলাকা</option></select>
             <select id="filterCluster"><option value="">সব ক্লাস্টার</option></select>
         </div>
+
         <div class="view-toggle">
             <button class="view-btn active" data-view="grid">📱 কার্ড ভিউ</button>
             <button class="view-btn" data-view="list">📋 লিস্ট ভিউ</button>
         </div>
+
         <div class="stats-row">
             <div class="stat-card"><div class="stat-number" id="totalCount">0</div><div>মোট সদস্য</div></div>
-            <div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>দেখানো হচ্ছে</div></div>
+            <div class="stat-card"><div class="stat-number" id="filteredCount">0</div><div>ফলাফল</div></div>
         </div>
 
         <div id="gridView" class="people-grid"></div>
+        
         <div id="listView" class="list-view">
             <table>
-                <thead><tr><th>নাম</th><th>ফোন</th><th>এলাকা</th><th>রোল</th><th>নোট</th><th></th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>নাম</th>
+                        <th>ফোন</th>
+                        <th>এলাকা</th>
+                        <th>রোল</th>
+                        <th>নোট</th>
+                        <th>অ্যাকশন</th>
+                    </tr>
+                </thead>
                 <tbody id="listTableBody"></tbody>
             </table>
         </div>
@@ -191,14 +454,15 @@
 </div>
 
 <script>
+    // ======================= কনফিগারেশন =======================
     const ADMIN_PASSWORD = "admin123";
-    const STORAGE_KEY = "peopleManagerFinal";
+    const STORAGE_KEY = "peopleManagerPro";
 
     let peopleData = [];
     let fuseInstance = null;
     let currentView = 'grid';
 
-    // ফোন ফাংশন
+    // ======================= ফোন নম্বর ইউটিলিটি =======================
     function cleanIndianPhone(phone) {
         let cleaned = String(phone).replace(/[\s\-\(\)]/g, '');
         if (cleaned.startsWith('+91')) cleaned = cleaned.slice(3);
@@ -206,29 +470,37 @@
         if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
         return cleaned.replace(/\D/g, '');
     }
-    function isValidIndianPhone(phone) { return /^[6-9]\d{9}$/.test(cleanIndianPhone(phone)); }
+    
+    function isValidIndianPhone(phone) {
+        const cleaned = cleanIndianPhone(phone);
+        return /^[6-9]\d{9}$/.test(cleaned);
+    }
+    
     function validatePhoneField() {
-        const inp = document.getElementById('phone'), hint = document.getElementById('phoneHint');
+        const inp = document.getElementById('phone');
+        const hint = document.getElementById('phoneHint');
         const raw = inp.value;
         if (!raw) { hint.innerHTML = ''; return false; }
         const valid = isValidIndianPhone(raw);
-        hint.innerHTML = valid ? '✓ বৈধ ভারতীয় মোবাইল' : '✗ ১০ ডিজিট, 6/7/8/9 দিয়ে শুরু';
+        hint.innerHTML = valid ? '✓ বৈধ ভারতীয় মোবাইল নম্বর' : '✗ ১০ ডিজিট, 6/7/8/9 দিয়ে শুরু';
         hint.style.color = valid ? '#10b981' : '#ef4444';
         return valid;
     }
+    
     function isDuplicatePhone(phone, excludeId = null) {
         const cleaned = cleanIndianPhone(phone);
         return peopleData.some(p => {
-            if (excludeId !== null && p.id == excludeId) return false;
+            if (excludeId !== null && p.id === excludeId) return false;
             return cleanIndianPhone(p.phone) === cleaned;
         });
     }
 
-    // স্টোরেজ
+    // ======================= স্টোরেজ ও ফিউজ =======================
     function saveToStorage() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData));
         updateAll();
     }
+    
     function rebuildFuse() {
         fuseInstance = new Fuse(peopleData, {
             keys: ['name', 'phone', 'area', 'role', 'cluster', 'note'],
@@ -236,11 +508,12 @@
             includeMatches: true
         });
     }
+    
     function getFilteredData() {
-        let filtered = peopleData;
-        const q = document.getElementById('searchBox').value.trim();
-        if (q) {
-            const results = fuseInstance.search(q);
+        let filtered = [...peopleData];
+        const query = document.getElementById('searchBox').value.trim();
+        if (query) {
+            const results = fuseInstance.search(query);
             filtered = results.map(r => r.item);
         }
         const role = document.getElementById('filterRole').value;
@@ -251,56 +524,67 @@
         if (cluster) filtered = filtered.filter(p => p.cluster === cluster);
         return filtered;
     }
+    
     function highlightText(text, query) {
         if (!query || !text) return text || '';
         const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return text.replace(regex, `<span style="background:#fef08a; color:#0f172a;">$1</span>`);
+        return text.replace(regex, `<span style="background:#fef08a; color:#0f172a; padding:0 2px; border-radius:4px;">$1</span>`);
     }
 
-    // রেন্ডার
+    // ======================= রেন্ডারিং =======================
     function render() {
         if (currentView === 'grid') renderGrid();
         else renderList();
         updateStats();
     }
+    
     function updateStats() {
         const filtered = getFilteredData();
         document.getElementById('filteredCount').innerText = filtered.length;
         document.getElementById('totalCount').innerText = peopleData.length;
     }
+    
     function renderGrid() {
         const filtered = getFilteredData();
         const grid = document.getElementById('gridView');
         grid.innerHTML = '';
-        const q = document.getElementById('searchBox').value.trim();
-        filtered.forEach(p => {
+        const query = document.getElementById('searchBox').value.trim();
+        
+        if (filtered.length === 0) {
+            grid.innerHTML = '<div style="text-align:center; padding:48px; color:#94a3b8;">😞 কোন সদস্য খুঁজে পাওয়া যায়নি</div>';
+            return;
+        }
+        
+        filtered.forEach(person => {
             const card = document.createElement('div');
             card.className = 'person-card';
-            const nameHtml = highlightText(p.name, q);
-            const phoneHtml = highlightText(p.phone, q);
-            const areaHtml = highlightText(p.area || '', q);
-            const roleHtml = highlightText(p.role || '', q);
-            const clusterHtml = highlightText(p.cluster || '', q);
-            const noteHtml = highlightText(p.note || '', q);
+            
+            const nameHtml = highlightText(person.name, query);
+            const phoneHtml = highlightText(person.phone, query);
+            const areaHtml = highlightText(person.area || '', query);
+            const roleHtml = highlightText(person.role || '', query);
+            const clusterHtml = highlightText(person.cluster || '', query);
+            const noteHtml = highlightText(person.note || '', query);
+            
             card.innerHTML = `
                 <div class="card-header">
                     <div class="person-name">${nameHtml || 'নাম নেই'}</div>
                     <div class="person-phone">📞 ${phoneHtml}</div>
                 </div>
                 <div class="detail-row">
-                    ${p.area ? `<span class="detail-badge">📍 ${areaHtml}</span>` : ''}
-                    ${p.role ? `<span class="detail-badge">👤 ${roleHtml}</span>` : ''}
-                    ${p.cluster ? `<span class="detail-badge">🔘 ${clusterHtml}</span>` : ''}
+                    ${person.area ? `<span class="detail-badge">📍 ${areaHtml}</span>` : ''}
+                    ${person.role ? `<span class="detail-badge">👤 ${roleHtml}</span>` : ''}
+                    ${person.cluster ? `<span class="detail-badge">🔘 ${clusterHtml}</span>` : ''}
                 </div>
-                ${p.note ? `<div class="note-text">📝 ${noteHtml}</div>` : ''}
+                ${person.note ? `<div class="note-text">📝 ${noteHtml}</div>` : ''}
                 <div class="card-actions">
-                    <button class="icon-btn call-btn" data-phone="${p.phone}" title="কল">📞 কল</button>
-                    <button class="icon-btn wa-btn" data-phone="${p.phone}" title="হোয়াটসঅ্যাপ">💬 হোয়াটসঅ্যাপ</button>
+                    <button class="icon-btn call-btn" data-phone="${person.phone}" title="কল করুন">📞 কল</button>
+                    <button class="icon-btn wa-btn" data-phone="${person.phone}" title="হোয়াটসঅ্যাপে বার্তা">💬 হোয়াটসঅ্যাপ</button>
                     <div class="kebab-wrapper">
-                        <button class="icon-btn kebab-btn">⋮</button>
+                        <button class="icon-btn kebab-btn" title="অপশন">⋮</button>
                         <div class="kebab-menu">
-                            <button class="edit-person" data-id="${p.id}">✏️ এডিট</button>
-                            <button class="delete-person" data-id="${p.id}">🗑️ ডিলিট</button>
+                            <button class="edit-person" data-id="${person.id}">✏️ এডিট</button>
+                            <button class="delete-person" data-id="${person.id}">🗑️ ডিলিট</button>
                         </div>
                     </div>
                 </div>
@@ -309,68 +593,86 @@
         });
         attachCardEvents();
     }
+    
     function renderList() {
         const filtered = getFilteredData();
         const tbody = document.getElementById('listTableBody');
         tbody.innerHTML = '';
-        const q = document.getElementById('searchBox').value.trim();
-        filtered.forEach(p => {
+        const query = document.getElementById('searchBox').value.trim();
+        
+        filtered.forEach(person => {
             const row = tbody.insertRow();
-            row.insertCell(0).innerHTML = highlightText(p.name, q);
-            row.insertCell(1).innerHTML = `<a href="tel:+91${cleanIndianPhone(p.phone)}">${highlightText(p.phone, q)}</a>`;
-            row.insertCell(2).innerHTML = highlightText(p.area || '', q);
-            row.insertCell(3).innerHTML = highlightText(p.role || '', q);
-            row.insertCell(4).innerHTML = highlightText(p.note || '', q);
+            row.insertCell(0).innerHTML = highlightText(person.name, query);
+            row.insertCell(1).innerHTML = `<a href="tel:+91${cleanIndianPhone(person.phone)}" style="text-decoration:none; color:#2563eb;">${highlightText(person.phone, query)}</a>`;
+            row.insertCell(2).innerHTML = highlightText(person.area || '', query);
+            row.insertCell(3).innerHTML = highlightText(person.role || '', query);
+            row.insertCell(4).innerHTML = highlightText(person.note || '', query);
             const actions = row.insertCell(5);
             actions.innerHTML = `
-                <button class="icon-btn call-list" data-phone="${p.phone}" style="background:none;">📞</button>
-                <button class="icon-btn wa-list" data-phone="${p.phone}" style="background:none;">💬</button>
-                <button class="icon-btn edit-list" data-id="${p.id}">✏️</button>
-                <button class="icon-btn delete-list" data-id="${p.id}">🗑️</button>
+                <button class="icon-btn call-list" data-phone="${person.phone}" style="background:none; font-size:1rem;">📞</button>
+                <button class="icon-btn wa-list" data-phone="${person.phone}" style="background:none; font-size:1rem;">💬</button>
+                <button class="icon-btn edit-list" data-id="${person.id}" style="background:none; font-size:1rem;">✏️</button>
+                <button class="icon-btn delete-list" data-id="${person.id}" style="background:none; font-size:1rem;">🗑️</button>
             `;
         });
         attachListEvents();
     }
+    
     function attachCardEvents() {
+        // কল বাটন
         document.querySelectorAll('.call-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const phone = cleanIndianPhone(btn.dataset.phone);
                 if (phone) window.location.href = `tel:+91${phone}`;
             });
         });
+        // হোয়াটসঅ্যাপ বাটন
         document.querySelectorAll('.wa-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const phone = cleanIndianPhone(btn.dataset.phone);
                 if (phone) window.open(`https://wa.me/91${phone}`, '_blank');
             });
         });
+        // কেবা মেনু টগল
         document.querySelectorAll('.kebab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const menu = btn.nextElementSibling;
-                document.querySelectorAll('.kebab-menu').forEach(m => { if (m !== menu) m.style.display = 'none'; });
+                const menu = btn.parentElement.querySelector('.kebab-menu');
+                document.querySelectorAll('.kebab-menu').forEach(m => {
+                    if (m !== menu) m.style.display = 'none';
+                });
                 menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
             });
         });
+        // এডিট
         document.querySelectorAll('.edit-person').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const id = parseInt(btn.dataset.id);
                 const person = peopleData.find(p => p.id === id);
                 if (person) loadPersonToForm(person);
                 btn.closest('.kebab-menu').style.display = 'none';
             });
         });
+        // ডিলিট
         document.querySelectorAll('.delete-person').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const id = parseInt(btn.dataset.id);
                 deletePersonWithPassword(id);
                 btn.closest('.kebab-menu').style.display = 'none';
             });
         });
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.kebab-menu').forEach(m => m.style.display = 'none');
+        // বাইরে ক্লিক করলে মেনু বন্ধ
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('kebab-btn') && !e.target.closest('.kebab-menu')) {
+                document.querySelectorAll('.kebab-menu').forEach(m => m.style.display = 'none');
+            }
         });
     }
+    
     function attachListEvents() {
         document.querySelectorAll('.call-list').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -399,141 +701,200 @@
         });
     }
 
-    // পাসওয়ার্ড সুরক্ষিত ডিলিট
+    // ======================= পাসওয়ার্ড সুরক্ষিত অপারেশন =======================
     function deletePersonWithPassword(id) {
         const pwd = prompt("🔐 ডিলিট করতে পাসওয়ার্ড দিন:");
-        if (pwd !== ADMIN_PASSWORD) { alert("ভুল পাসওয়ার্ড! ডিলিট বাতিল।"); return; }
-        if (confirm("নিশ্চিত ডিলিট?")) {
-            peopleData = peopleData.filter(p => p.id !== id);
-            saveToStorage();
-            if (document.getElementById('editId').value == id) resetFormToAddMode();
-            showToast("✅ সদস্য ডিলিট হয়েছে");
+        if (pwd !== ADMIN_PASSWORD) {
+            showToast("❌ ভুল পাসওয়ার্ড! ডিলিট বাতিল।");
+            return;
+        }
+        if (confirm("নিশ্চিত কি এই সদস্যকে ডিলিট করতে চান?")) {
+            const index = peopleData.findIndex(p => p.id === id);
+            if (index !== -1) {
+                peopleData.splice(index, 1);
+                saveToStorage();
+                if (document.getElementById('editId').value == id) resetFormToAddMode();
+                showToast("✅ সদস্য ডিলিট হয়েছে");
+            }
         }
     }
+    
     function resetDataWithPassword() {
         const pwd = prompt("🔐 রিসেট করতে পাসওয়ার্ড দিন:");
-        if (pwd !== ADMIN_PASSWORD) { alert("ভুল পাসওয়ার্ড! রিসেট বাতিল।"); return; }
-        if (confirm("সব ডেটা ডিফল্ট উদাহরণ দিয়ে রিসেট হবে। নিশ্চিত?")) {
+        if (pwd !== ADMIN_PASSWORD) {
+            showToast("❌ ভুল পাসওয়ার্ড! রিসেট বাতিল।");
+            return;
+        }
+        if (confirm("সব ডেটা ডিফল্ট উদাহরণ দিয়ে রিসেট হবে। নিশ্চিত?")) {
             loadDefaultData();
             saveToStorage();
             resetFormToAddMode();
             toggleForm(false);
-            showToast("ডেটা রিসেট হয়েছে");
+            showToast("✅ ডেটা ডিফল্টে রিসেট হয়েছে");
         }
     }
-    function showToast(msg) {
+    
+    function showToast(message) {
         const toast = document.createElement('div');
         toast.className = 'toast';
-        toast.innerText = msg;
+        toast.innerText = message;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // ফর্ম
+    // ======================= ফর্ম হ্যান্ডলিং =======================
     function toggleForm(show) {
-        document.getElementById('formCard').classList.toggle('show', show);
+        const fc = document.getElementById('formCard');
+        if (show) fc.classList.add('show');
+        else fc.classList.remove('show');
     }
+    
     function resetFormToAddMode() {
         document.getElementById('peopleForm').reset();
         document.getElementById('editId').value = '';
         document.getElementById('formTitle').innerHTML = '➕ নতুন সদস্য যোগ করুন';
-        document.getElementById('submitBtn').innerHTML = '➕ যোগ করুন';
+        document.getElementById('submitBtn').innerHTML = '💾 সংরক্ষণ করুন';
         document.getElementById('cancelEditBtn').style.display = 'none';
         document.getElementById('phoneHint').innerHTML = '';
     }
-    function loadPersonToForm(p) {
-        document.getElementById('name').value = p.name;
-        document.getElementById('phone').value = p.phone;
+    
+    function loadPersonToForm(person) {
+        document.getElementById('name').value = person.name;
+        document.getElementById('phone').value = person.phone;
         validatePhoneField();
-        document.getElementById('area').value = p.area || '';
-        document.getElementById('role').value = p.role || '';
-        document.getElementById('cluster').value = p.cluster || '';
-        document.getElementById('note').value = p.note || '';
-        document.getElementById('editId').value = p.id;
+        document.getElementById('area').value = person.area || '';
+        document.getElementById('role').value = person.role || '';
+        document.getElementById('cluster').value = person.cluster || '';
+        document.getElementById('note').value = person.note || '';
+        document.getElementById('editId').value = person.id;
         document.getElementById('formTitle').innerHTML = '✏️ সদস্য এডিট করুন';
         document.getElementById('submitBtn').innerHTML = '💾 আপডেট করুন';
         document.getElementById('cancelEditBtn').style.display = 'inline-block';
         toggleForm(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    
     function savePerson(e) {
         e.preventDefault();
         const name = document.getElementById('name').value.trim();
         let rawPhone = document.getElementById('phone').value.trim();
-        if (!name) return alert('নাম দিন');
-        if (!rawPhone) return alert('ফোন দিন');
-        if (!isValidIndianPhone(rawPhone)) return alert('ভারতীয় মোবাইল নম্বর দিন (10 ডিজিট, 6/7/8/9 দিয়ে শুরু)');
+        
+        if (!name) { showToast("নাম দিন"); return; }
+        if (!rawPhone) { showToast("ফোন নম্বর দিন"); return; }
+        if (!isValidIndianPhone(rawPhone)) { showToast("ভারতীয় মোবাইল নম্বর দিন (10 ডিজিট, 6/7/8/9 দিয়ে শুরু)"); return; }
+        
         const editId = document.getElementById('editId').value;
         const cleanedPhone = cleanIndianPhone(rawPhone);
+        
+        // এডিট মোডে নিজের ফোন চেক
         let isEditingSamePhone = false;
         if (editId) {
-            const curr = peopleData.find(p => p.id == editId);
+            const curr = peopleData.find(p => p.id == parseInt(editId));
             if (curr && cleanIndianPhone(curr.phone) === cleanedPhone) isEditingSamePhone = true;
         }
+        
         if (!isEditingSamePhone && isDuplicatePhone(rawPhone, editId ? parseInt(editId) : null)) {
-            return alert('এই ফোন নম্বরটি আগে থেকেই আছে!');
+            showToast("এই ফোন নম্বরটি আগে থেকেই আছে!");
+            return;
         }
+        
         const area = document.getElementById('area').value.trim();
         const role = document.getElementById('role').value.trim();
         const cluster = document.getElementById('cluster').value.trim();
         const note = document.getElementById('note').value.trim();
+        
         if (!editId) {
-            const newId = peopleData.length ? Math.max(...peopleData.map(p => p.id)) + 1 : 1;
-            peopleData.push({ id: newId, name, phone: cleanedPhone, area, role, cluster, note });
+            // নতুন সদস্য যোগ
+            const maxId = peopleData.length > 0 ? Math.max(...peopleData.map(p => p.id)) : 0;
+            const newId = maxId + 1;
+            peopleData.push({
+                id: newId,
+                name: name,
+                phone: cleanedPhone,
+                area: area,
+                role: role,
+                cluster: cluster,
+                note: note
+            });
+            showToast("✅ নতুন সদস্য যোগ হয়েছে");
         } else {
-            const idx = peopleData.findIndex(p => p.id == editId);
-            if (idx !== -1) peopleData[idx] = { ...peopleData[idx], name, phone: cleanedPhone, area, role, cluster, note };
+            // বিদ্যমান সদস্য এডিট
+            const index = peopleData.findIndex(p => p.id == parseInt(editId));
+            if (index !== -1) {
+                peopleData[index] = {
+                    ...peopleData[index],
+                    name: name,
+                    phone: cleanedPhone,
+                    area: area,
+                    role: role,
+                    cluster: cluster,
+                    note: note
+                };
+                showToast("✅ সদস্যের তথ্য আপডেট হয়েছে");
+            }
             resetFormToAddMode();
         }
+        
         saveToStorage();
         resetFormToAddMode();
         toggleForm(false);
     }
 
-    // CSV/JSON এক্সপোর্ট ও ইমপোর্ট (ইমপোর্টে id ঠিক করা হয়েছে)
+    // ======================= এক্সপোর্ট / ইমপোর্ট =======================
     function exportToCSV() {
-        if (!peopleData.length) return alert("কোন ডেটা নেই");
-        const headers = ["ID","নাম","ফোন","এলাকা","রোল","ক্লাস্টার","নোট"];
+        if (!peopleData.length) { showToast("কোন ডেটা নেই"); return; }
+        const headers = ["ID", "নাম", "ফোন", "এলাকা", "রোল", "ক্লাস্টার", "নোট"];
         const rows = peopleData.map(p => [
-            p.id, `"${p.name}"`, p.phone, `"${p.area||''}"`, `"${p.role||''}"`, `"${p.cluster||''}"`, `"${p.note||''}"`
+            p.id,
+            `"${p.name.replace(/"/g, '""')}"`,
+            p.phone,
+            `"${(p.area || '').replace(/"/g, '""')}"`,
+            `"${(p.role || '').replace(/"/g, '""')}"`,
+            `"${(p.cluster || '').replace(/"/g, '""')}"`,
+            `"${(p.note || '').replace(/"/g, '""')}"`
         ]);
         const csv = [headers, ...rows].map(row => row.join(",")).join("\n");
-        const blob = new Blob(["\uFEFF" + csv], {type: "text/csv"});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `people_${new Date().toISOString().slice(0,10)}.csv`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        showToast("CSV ডাউনলোড হয়েছে");
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `people_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast("📎 CSV ফাইল ডাউনলোড হয়েছে");
     }
+    
     function exportToJSON() {
         const dataStr = JSON.stringify(peopleData, null, 2);
-        const blob = new Blob([dataStr], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `people_backup_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        showToast("JSON ব্যাকআপ ডাউনলোড হয়েছে");
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `people_backup_${new Date().toISOString().slice(0,10)}.json`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        showToast("📁 JSON ব্যাকআপ ডাউনলোড হয়েছে");
     }
+    
     function importFromJSON(file) {
         const reader = new FileReader();
-        reader.onload = ev => {
+        reader.onload = (event) => {
             try {
-                let imported = JSON.parse(ev.target.result);
-                if (!Array.isArray(imported)) throw new Error();
-                // প্রতিটি অবজেক্টে numeric id নিশ্চিত করা, ডুপ্লিকেট মুক্ত
-                const maxId = peopleData.length ? Math.max(...peopleData.map(p => p.id)) : 0;
-                let nextId = maxId + 1;
-                imported = imported.map(item => {
-                    let newId;
-                    if (item.id && typeof item.id === 'number' && !peopleData.some(p => p.id === item.id)) {
-                        newId = item.id;
+                const imported = JSON.parse(event.target.result);
+                if (!Array.isArray(imported)) throw new Error("JSON অবজেক্টের অ্যারে হওয়া দরকার");
+                
+                // প্রতিটি আইটেমের জন্য ইউনিক id তৈরি
+                const maxExistingId = peopleData.length > 0 ? Math.max(...peopleData.map(p => p.id)) : 0;
+                let nextId = maxExistingId + 1;
+                
+                const newData = imported.map(item => {
+                    let validId = null;
+                    // যদি item.id থাকে এবং numeric হয় এবং existing ডেটায় না থাকে
+                    if (item.id && typeof item.id === 'number' && !peopleData.some(p => p.id === item.id) && !newDataSome) {
+                        validId = item.id;
                     } else {
-                        newId = nextId++;
+                        validId = nextId++;
                     }
                     return {
-                        id: newId,
+                        id: validId,
                         name: item.name || '',
                         phone: item.phone || '',
                         area: item.area || '',
@@ -542,51 +903,65 @@
                         note: item.note || ''
                     };
                 });
-                // পুরনো ডেটার সাথে যোগ না করে প্রতিস্থাপন করাই ভালো (ব্যবহারকারী চাইলে পরে ম্যানুয়ালি মার্জ করবেন)
-                peopleData = imported;
+                
+                // newDataSome এর জন্য ডামি ভেরিয়েবল ঠিক করা - উপরের লুপে চেক করার জন্য
+                // আসলে আমরা সহজ উপায়ে করি: প্রথমে সব id রি-অ্যাসাইন
+                const finalData = imported.map((item, idx) => {
+                    return {
+                        id: maxExistingId + idx + 1,
+                        name: item.name || '',
+                        phone: item.phone || '',
+                        area: item.area || '',
+                        role: item.role || '',
+                        cluster: item.cluster || '',
+                        note: item.note || ''
+                    };
+                });
+                
+                peopleData = finalData;
                 saveToStorage();
-                alert("✅ JSON ইমপোর্ট সফল! এখন আপনি এডিট ও ডিলিট করতে পারবেন।");
-            } catch(e) {
-                alert("ভুল JSON ফাইল: " + e.message);
+                showToast("✅ JSON ইমপোর্ট সফল! এখন সব ডেটা এডিট ও ডিলিট করা যাবে।");
+            } catch (err) {
+                showToast("❌ ভুল JSON ফাইল: " + err.message);
             }
         };
         reader.readAsText(file);
     }
+    
     function loadDefaultData() {
         peopleData = [
             { id: 1, name: "রাহুল শর্মা", phone: "9876543210", area: "দিল্লি", role: "সদস্য", cluster: "উত্তর", note: "সক্রিয় কর্মী, নিয়মিত যোগাযোগ রাখতে হবে" },
-            { id: 2, name: "প্রিয়া সিং", phone: "9988776655", area: "মুম্বই", role: "নেত্রী", cluster: "পশ্চিম", note: "নতুন যোগদান, প্রশিক্ষণ প্রয়োজন" }
+            { id: 2, name: "প্রিয়া সিং", phone: "9988776655", area: "মুম্বই", role: "নেত্রী", cluster: "পশ্চিম", note: "নতুন যোগদান, প্রশিক্ষণ প্রয়োজন" },
+            { id: 3, name: "অমিত কুমার", phone: "9000000000", area: "পাটনা", role: "ভলান্টিয়ার", cluster: "পূর্ব", note: "বিশেষ দক্ষতা, দ্রুত যোগাযোগ করুন" }
         ];
-        saveToStorage();
     }
 
+    // ======================= ফিল্টার ও আপডেট =======================
     function populateFilters() {
-        const roles = [...new Set(peopleData.map(p=>p.role).filter(r=>r))];
-        const areas = [...new Set(peopleData.map(p=>p.area).filter(a=>a))];
-        const clusters = [...new Set(peopleData.map(p=>p.cluster).filter(c=>c))];
+        const roles = [...new Set(peopleData.map(p => p.role).filter(r => r && r.trim()))];
+        const areas = [...new Set(peopleData.map(p => p.area).filter(a => a && a.trim()))];
+        const clusters = [...new Set(peopleData.map(p => p.cluster).filter(c => c && c.trim()))];
+        
         const roleSel = document.getElementById('filterRole');
         const areaSel = document.getElementById('filterArea');
         const clusterSel = document.getElementById('filterCluster');
+        
         roleSel.innerHTML = '<option value="">সব রোল</option>';
         areaSel.innerHTML = '<option value="">সব এলাকা</option>';
         clusterSel.innerHTML = '<option value="">সব ক্লাস্টার</option>';
-        roles.forEach(r=>{let opt=document.createElement('option'); opt.value=r; opt.text=r; roleSel.appendChild(opt);});
-        areas.forEach(a=>{let opt=document.createElement('option'); opt.value=a; opt.text=a; areaSel.appendChild(opt);});
-        clusters.forEach(c=>{let opt=document.createElement('option'); opt.value=c; opt.text=c; clusterSel.appendChild(opt);});
+        
+        roles.forEach(r => { let opt = document.createElement('option'); opt.value = r; opt.text = r; roleSel.appendChild(opt); });
+        areas.forEach(a => { let opt = document.createElement('option'); opt.value = a; opt.text = a; areaSel.appendChild(opt); });
+        clusters.forEach(c => { let opt = document.createElement('option'); opt.value = c; opt.text = c; clusterSel.appendChild(opt); });
     }
+    
     function updateAll() {
         rebuildFuse();
         populateFilters();
         render();
     }
-    function initData() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) peopleData = JSON.parse(stored);
-        else loadDefaultData();
-        updateAll();
-    }
-
-    // ইভেন্ট লিসেনার
+    
+    // ======================= ইভেন্ট লিসেনার ও আরম্ভ =======================
     document.getElementById('toggleFormBtn').addEventListener('click', () => toggleForm(true));
     document.getElementById('peopleForm').addEventListener('submit', savePerson);
     document.getElementById('cancelEditBtn').addEventListener('click', () => { resetFormToAddMode(); toggleForm(false); });
@@ -596,9 +971,13 @@
     document.getElementById('filterCluster').addEventListener('change', () => render());
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
     document.getElementById('exportJsonBtn').addEventListener('click', exportToJSON);
-    document.getElementById('importFile').addEventListener('change', (e) => { if(e.target.files.length) importFromJSON(e.target.files[0]); e.target.value = ''; });
+    document.getElementById('importFile').addEventListener('change', (e) => {
+        if (e.target.files.length) importFromJSON(e.target.files[0]);
+        e.target.value = '';
+    });
     document.getElementById('resetDataBtn').addEventListener('click', resetDataWithPassword);
     document.getElementById('phone').addEventListener('input', validatePhoneField);
+    
     document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
@@ -609,7 +988,22 @@
             render();
         });
     });
-    initData();
+    
+    function init() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            peopleData = JSON.parse(stored);
+            // id গুলো numeric কিনা নিশ্চিত করা
+            peopleData.forEach((p, idx) => {
+                if (typeof p.id !== 'number') p.id = idx + 1;
+            });
+        } else {
+            loadDefaultData();
+        }
+        updateAll();
+    }
+    
+    init();
 </script>
 </body>
 </html>
