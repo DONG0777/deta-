@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>প্রো পিপল ম্যানেজার | অটো সার্চ</title>
+    <title>প্রো পিপল ম্যানেজার | ড্রপডাউন ফিল্টার</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -78,6 +78,7 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
         }
+        /* অটো সাজেশন স্টাইল */
         .suggestions-box {
             position: absolute;
             top: 100%;
@@ -119,13 +120,20 @@
         .btn-outline { background: transparent; border: 1.5px solid #cbd5e1; }
         .btn-new { width: 100%; background: #1e293b; color: white; padding: 14px; margin-bottom: 12px; font-size: 1rem; }
         .btn-group { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 20px; }
-        .search-box {
-            width: 100%;
-            padding: 14px 20px;
-            border-radius: 60px;
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .filters select {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 16px;
+            border-radius: 40px;
+            background: white;
             border: 1.5px solid #e2e8f0;
-            font-size: 0.95rem;
-            margin-bottom: 1.2rem;
+            font-size: 0.9rem;
         }
         .view-toggle {
             display: flex;
@@ -322,13 +330,14 @@
         @media (max-width: 640px) {
             body { padding: 12px; }
             .card { padding: 1rem; }
+            .filters select { min-width: 100%; }
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="app-header">
-        <h1>🔍 প্রো পিপল ম্যানেজার</h1>
+        <h1>👥 প্রো পিপল ম্যানেজার</h1>
     </div>
 
     <button id="toggleFormBtn" class="btn btn-new">➕ নতুন সদস্য যোগ করুন</button>
@@ -373,7 +382,22 @@
     </div>
 
     <div class="card">
-        <input type="text" id="searchBox" class="search-box" placeholder="🔍 নাম, ফোন, এলাকা, ব্লক, জিপি, রোল, নোট - যা খুশি লিখুন...">
+        <!-- ফিল্টার ড্রপডাউন - সার্চ বক্স সরানো হয়েছে -->
+        <div class="filters">
+            <select id="filterArea">
+                <option value="">সব এলাকা</option>
+            </select>
+            <select id="filterBlock">
+                <option value="">সব ব্লক</option>
+            </select>
+            <select id="filterGp">
+                <option value="">সব গ্রাম পঞ্চায়েত</option>
+            </select>
+            <select id="filterRole">
+                <option value="">সব রোল</option>
+            </select>
+        </div>
+
         <div class="view-toggle">
             <button class="view-btn active" data-view="grid">📱 কার্ড ভিউ</button>
             <button class="view-btn" data-view="list">📋 লিস্ট ভিউ</button>
@@ -409,16 +433,15 @@
     const STORAGE_KEY = "peopleManagerPro";
 
     let peopleData = [];
-    let fuseInstance = null;
     let currentView = 'grid';
 
-    // ইউনিক ভ্যালু কালেক্ট করার ফাংশন (সাজেশনের জন্য)
+    // ইউনিক ভ্যালু কালেক্ট করার ফাংশন (সাজেশন ও ফিল্টারের জন্য)
     function getUniqueValues(fieldName) {
         const values = peopleData.map(p => p[fieldName]).filter(v => v && v.trim());
         return [...new Set(values)];
     }
 
-    // অটো সাজেশন সেটআপ
+    // অটো সাজেশন সেটআপ (ফর্মের জন্য)
     function setupSuggestion(fieldId, suggestionsId, fieldName) {
         const input = document.getElementById(fieldId);
         const suggestionsBox = document.getElementById(suggestionsId);
@@ -478,28 +501,29 @@
         });
     }
 
-    // স্টোরেজ ও ফিউজ
+    // স্টোরেজ
     function saveToStorage() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(peopleData));
         updateAll();
     }
-    function rebuildFuse() {
-        // সব ফিল্ডেই সার্চ করবে
-        fuseInstance = new Fuse(peopleData, {
-            keys: ['name', 'phone', 'area', 'role', 'block', 'gp', 'note'],
-            threshold: 0.3,
-            includeMatches: true
-        });
-    }
+
+    // ফিল্টার ডেটা (ড্রপডাউন ভিত্তিক)
     function getFilteredData() {
         let filtered = [...peopleData];
-        const query = document.getElementById('searchBox').value.trim();
-        if (query) {
-            const results = fuseInstance.search(query);
-            filtered = results.map(r => r.item);
-        }
+        
+        const area = document.getElementById('filterArea').value;
+        const block = document.getElementById('filterBlock').value;
+        const gp = document.getElementById('filterGp').value;
+        const role = document.getElementById('filterRole').value;
+        
+        if (area) filtered = filtered.filter(p => p.area === area);
+        if (block) filtered = filtered.filter(p => p.block === block);
+        if (gp) filtered = filtered.filter(p => p.gp === gp);
+        if (role) filtered = filtered.filter(p => p.role === role);
+        
         return filtered;
     }
+    
     function highlightText(text, query) {
         if (!query || !text) return text || '';
         const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -624,7 +648,6 @@
         const filtered = getFilteredData();
         const grid = document.getElementById('gridView');
         grid.innerHTML = '';
-        const query = document.getElementById('searchBox').value.trim();
         if (filtered.length === 0) {
             grid.innerHTML = '<div style="text-align:center; padding:48px; color:#94a3b8;">😞 কোন সদস্য খুঁজে পাওয়া যায়নি</div>';
             return;
@@ -632,25 +655,18 @@
         filtered.forEach(person => {
             const card = document.createElement('div');
             card.className = 'person-card';
-            const nameHtml = highlightText(person.name, query);
-            const phoneHtml = highlightText(person.phone, query);
-            const areaHtml = highlightText(person.area || '', query);
-            const roleHtml = highlightText(person.role || '', query);
-            const blockHtml = highlightText(person.block || '', query);
-            const gpHtml = highlightText(person.gp || '', query);
-            const noteHtml = highlightText(person.note || '', query);
             card.innerHTML = `
                 <div class="card-header">
-                    <div class="person-name">${nameHtml || 'নাম নেই'}</div>
-                    <div class="person-phone">📞 ${phoneHtml}</div>
+                    <div class="person-name">${escapeHtml(person.name) || 'নাম নেই'}</div>
+                    <div class="person-phone">📞 ${escapeHtml(person.phone)}</div>
                 </div>
                 <div class="detail-row">
-                    ${person.area ? `<span class="detail-badge">📍 ${areaHtml}</span>` : ''}
-                    ${person.role ? `<span class="detail-badge">👤 ${roleHtml}</span>` : ''}
-                    ${person.block ? `<span class="detail-badge">🏘️ ${blockHtml}</span>` : ''}
-                    ${person.gp ? `<span class="detail-badge">🌾 ${gpHtml}</span>` : ''}
+                    ${person.area ? `<span class="detail-badge">📍 ${escapeHtml(person.area)}</span>` : ''}
+                    ${person.role ? `<span class="detail-badge">👤 ${escapeHtml(person.role)}</span>` : ''}
+                    ${person.block ? `<span class="detail-badge">🏘️ ${escapeHtml(person.block)}</span>` : ''}
+                    ${person.gp ? `<span class="detail-badge">🌾 ${escapeHtml(person.gp)}</span>` : ''}
                 </div>
-                ${person.note ? `<div class="note-text">📝 ${noteHtml}</div>` : ''}
+                ${person.note ? `<div class="note-text">📝 ${escapeHtml(person.note)}</div>` : ''}
                 <div class="card-actions">
                     <button class="icon-btn call-btn" data-phone="${person.phone}">📞 কল</button>
                     <button class="icon-btn wa-btn" data-phone="${person.phone}">💬 হোয়াটসঅ্যাপ</button>
@@ -672,16 +688,15 @@
         const filtered = getFilteredData();
         const tbody = document.getElementById('listTableBody');
         tbody.innerHTML = '';
-        const query = document.getElementById('searchBox').value.trim();
         filtered.forEach(person => {
             const row = tbody.insertRow();
-            row.insertCell(0).innerHTML = highlightText(person.name, query);
-            row.insertCell(1).innerHTML = `<a href="tel:+91${cleanIndianPhone(person.phone)}">${highlightText(person.phone, query)}</a>`;
-            row.insertCell(2).innerHTML = highlightText(person.area || '', query);
-            row.insertCell(3).innerHTML = highlightText(person.role || '', query);
-            row.insertCell(4).innerHTML = highlightText(person.block || '', query);
-            row.insertCell(5).innerHTML = highlightText(person.gp || '', query);
-            row.insertCell(6).innerHTML = highlightText(person.note || '', query);
+            row.insertCell(0).innerHTML = escapeHtml(person.name);
+            row.insertCell(1).innerHTML = `<a href="tel:+91${cleanIndianPhone(person.phone)}">${escapeHtml(person.phone)}</a>`;
+            row.insertCell(2).innerHTML = escapeHtml(person.area || '');
+            row.insertCell(3).innerHTML = escapeHtml(person.role || '');
+            row.insertCell(4).innerHTML = escapeHtml(person.block || '');
+            row.insertCell(5).innerHTML = escapeHtml(person.gp || '');
+            row.insertCell(6).innerHTML = escapeHtml(person.note || '');
             const actions = row.insertCell(7);
             actions.innerHTML = `
                 <button class="icon-btn call-list" data-phone="${person.phone}">📞</button>
@@ -790,6 +805,29 @@
         toggleForm(false);
     }
 
+    // ফিল্টার অপশন পপুলেট
+    function populateFilters() {
+        const areas = getUniqueValues('area');
+        const blocks = getUniqueValues('block');
+        const gps = getUniqueValues('gp');
+        const roles = getUniqueValues('role');
+        
+        const areaSel = document.getElementById('filterArea');
+        const blockSel = document.getElementById('filterBlock');
+        const gpSel = document.getElementById('filterGp');
+        const roleSel = document.getElementById('filterRole');
+        
+        areaSel.innerHTML = '<option value="">সব এলাকা</option>';
+        blockSel.innerHTML = '<option value="">সব ব্লক</option>';
+        gpSel.innerHTML = '<option value="">সব গ্রাম পঞ্চায়েত</option>';
+        roleSel.innerHTML = '<option value="">সব রোল</option>';
+        
+        areas.forEach(a => { let opt = document.createElement('option'); opt.value = a; opt.text = a; areaSel.appendChild(opt); });
+        blocks.forEach(b => { let opt = document.createElement('option'); opt.value = b; opt.text = b; blockSel.appendChild(opt); });
+        gps.forEach(g => { let opt = document.createElement('option'); opt.value = g; opt.text = g; gpSel.appendChild(opt); });
+        roles.forEach(r => { let opt = document.createElement('option'); opt.value = r; opt.text = r; roleSel.appendChild(opt); });
+    }
+
     // এক্সপোর্ট / ইমপোর্ট
     function exportToCSV() {
         if (!peopleData.length) { showToast("কোন ডেটা নেই"); return; }
@@ -869,9 +907,9 @@
     }
     
     function updateAll() {
-        rebuildFuse();
+        populateFilters();
         render();
-        // সাজেশন বক্সের জন্য ইউনিক ভ্যালু রিফ্রেশ
+        // সাজেশন বক্স সেটআপ
         setupSuggestion('area', 'areaSuggestions', 'area');
         setupSuggestion('role', 'roleSuggestions', 'role');
         setupSuggestion('block', 'blockSuggestions', 'block');
@@ -882,7 +920,13 @@
     document.getElementById('toggleFormBtn').addEventListener('click', () => { resetFormToAddMode(); toggleForm(true); });
     document.getElementById('peopleForm').addEventListener('submit', savePerson);
     document.getElementById('cancelEditBtn').addEventListener('click', () => { resetFormToAddMode(); toggleForm(false); });
-    document.getElementById('searchBox').addEventListener('input', () => render());
+    
+    // ফিল্টার ইভেন্ট
+    document.getElementById('filterArea').addEventListener('change', () => render());
+    document.getElementById('filterBlock').addEventListener('change', () => render());
+    document.getElementById('filterGp').addEventListener('change', () => render());
+    document.getElementById('filterRole').addEventListener('change', () => render());
+    
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
     document.getElementById('exportJsonBtn').addEventListener('click', exportToJSON);
     document.getElementById('importFile').addEventListener('change', (e) => { if(e.target.files.length) importFromJSON(e.target.files[0]); e.target.value = ''; });
