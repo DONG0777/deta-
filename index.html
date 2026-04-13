@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>প্রো পিপল ম্যানেজার | এডিট ও ডিলিট সহ</title>
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="প্রো পিপল">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>প্রো পিপল ম্যানেজার | PWA</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,6 +36,18 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+        .install-banner {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
         }
         .password-hint {
             background: #fef9c3;
@@ -295,11 +313,6 @@
             max-height: 85vh;
             overflow: auto;
         }
-        .modal-content h3 { margin-bottom: 20px; }
-        .modal-content input, .modal-content textarea {
-            width: 100%;
-            margin-bottom: 16px;
-        }
         .toast {
             position: fixed;
             bottom: 20px;
@@ -310,6 +323,23 @@
             border-radius: 40px;
             animation: fadeOut 3s forwards;
             z-index: 1000;
+        }
+        .offline-badge {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ef4444;
+            color: white;
+            text-align: center;
+            padding: 6px;
+            font-size: 0.75rem;
+            transform: translateY(-100%);
+            transition: 0.3s;
+            z-index: 1001;
+        }
+        .offline-badge.show {
+            transform: translateY(0);
         }
         @keyframes fadeOut {
             0% { opacity: 1; }
@@ -324,9 +354,15 @@
 </head>
 <body>
 <div class="container">
+    <div id="offlineBadge" class="offline-badge">📡 আপনি অফলাইনে আছেন। ডেটা সংরক্ষিত থাকবে, কিন্তু সিঙ্ক হবে না।</div>
+    
     <div class="app-header">
         <h1>👥 প্রো পিপল ম্যানেজার</h1>
         <div class="password-hint">🔐 পাসওয়ার্ড: admin123</div>
+    </div>
+    
+    <div id="installBanner" class="install-banner" style="display: none;">
+        📱 অ্যাপ ইন্সটল করুন ➕
     </div>
 
     <button id="toggleFormBtn" class="btn btn-new">➕ নতুন সদস্য যোগ করুন</button>
@@ -385,6 +421,40 @@
 </div>
 
 <script>
+    // PWA সেটআপ
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registered', reg))
+            .catch(err => console.log('Service Worker failed', err));
+    }
+    
+    // অফলাইন ডিটেক্ট
+    window.addEventListener('online', () => {
+        document.getElementById('offlineBadge').classList.remove('show');
+        showToast("✅ ইন্টারনেট সংযুক্ত হয়েছে");
+    });
+    window.addEventListener('offline', () => {
+        document.getElementById('offlineBadge').classList.add('show');
+        showToast("📡 ইন্টারনেট সংযোগ বিচ্ছিন্ন");
+    });
+    
+    // ইনস্টল প্রম্পট
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBanner').style.display = 'flex';
+    });
+    document.getElementById('installBanner').addEventListener('click', () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(() => {
+                deferredPrompt = null;
+                document.getElementById('installBanner').style.display = 'none';
+            });
+        }
+    });
+    
     // ======================= কনফিগারেশন =======================
     const ADMIN_PASSWORD = "admin123";
     const STORAGE_KEY = "peopleManagerPro";
@@ -452,7 +522,7 @@
         return text.replace(regex, `<span style="background:#fef08a; color:#0f172a; padding:0 2px; border-radius:4px;">$1</span>`);
     }
 
-    // ======================= এডিট মডাল ফাংশন =======================
+    // এডিট মডাল
     function showEditModal(person) {
         const modal = document.createElement('div');
         modal.className = 'modal';
@@ -558,7 +628,7 @@
         });
     }
 
-    // ======================= রেন্ডারিং =======================
+    // রেন্ডারিং
     function render() {
         if (currentView === 'grid') renderGrid();
         else renderList();
@@ -713,7 +783,7 @@
         });
     }
 
-    // ======================= ফর্ম হ্যান্ডলিং =======================
+    // ফর্ম হ্যান্ডলিং
     function toggleForm(show) {
         const fc = document.getElementById('formCard');
         if (show) fc.classList.add('show');
@@ -769,7 +839,7 @@
         toggleForm(false);
     }
 
-    // ======================= এক্সপোর্ট / ইমপোর্ট =======================
+    // এক্সপোর্ট / ইমপোর্ট
     function exportToCSV() {
         if (!peopleData.length) { showToast("কোন ডেটা নেই"); return; }
         const headers = ["ID", "নাম", "ফোন", "এলাকা", "রোল", "ক্লাস্টার", "নোট"];
@@ -807,22 +877,19 @@
             try {
                 const imported = JSON.parse(event.target.result);
                 if (!Array.isArray(imported)) throw new Error("JSON অবজেক্টের অ্যারে হওয়া দরকার");
-                
                 const maxExistingId = peopleData.length > 0 ? Math.max(...peopleData.map(p => p.id)) : 0;
-                const finalData = imported.map((item, idx) => {
-                    return {
-                        id: maxExistingId + idx + 1,
-                        name: item.name || '',
-                        phone: item.phone || '',
-                        area: item.area || '',
-                        role: item.role || '',
-                        cluster: item.cluster || '',
-                        note: item.note || ''
-                    };
-                });
+                const finalData = imported.map((item, idx) => ({
+                    id: maxExistingId + idx + 1,
+                    name: item.name || '',
+                    phone: item.phone || '',
+                    area: item.area || '',
+                    role: item.role || '',
+                    cluster: item.cluster || '',
+                    note: item.note || ''
+                }));
                 peopleData = finalData;
                 saveToStorage();
-                showToast("✅ JSON ইমপোর্ট সফল! এখন সব ডেটা এডিট ও ডিলিট করা যাবে।");
+                showToast("✅ JSON ইমপোর্ট সফল!");
             } catch (err) {
                 showToast("❌ ভুল JSON ফাইল: " + err.message);
             }
@@ -838,7 +905,6 @@
         ];
     }
 
-    // ======================= ফিল্টার ও আপডেট =======================
     function populateFilters() {
         const roles = [...new Set(peopleData.map(p => p.role).filter(r => r && r.trim()))];
         const areas = [...new Set(peopleData.map(p => p.area).filter(a => a && a.trim()))];
@@ -860,7 +926,7 @@
         render();
     }
     
-    // ======================= ইভেন্ট লিসেনার ও আরম্ভ =======================
+    // ইভেন্ট লিসেনার
     document.getElementById('toggleFormBtn').addEventListener('click', () => toggleForm(true));
     document.getElementById('peopleForm').addEventListener('submit', savePerson);
     document.getElementById('cancelEditBtn').addEventListener('click', () => { resetFormToAddMode(); toggleForm(false); });
